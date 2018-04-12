@@ -6,7 +6,7 @@
 apply plugin: 'groovy'
 apply plugin: 'application'
 
-defaultTasks 'clean', 'copybooks', 'build', 'test', 'groovydoc', 'update', 'runCopier', 'run' 
+defaultTasks 'clean', 'build', 'test', 'groovydoc', 'update', 'runCopier', 'run' 
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -97,15 +97,8 @@ task runTemplateMaker(type: JavaExec) {
 task update(type: Copy) {
     from "${buildDir}/distributions"
     into  file("distributions")
-    include 'CopyTools.*'
+    include 'F5.*'
     //exclude 'SkeletonTest.groovy'
-}
-
-task copybooks(type: Copy) {
-    from "${projectDir}/copybooks"
-    into  file("src/main/dist/copybooks")
-    include '*.F5'
-    include '*.txt'
 }
 
 task wrapper(type: Wrapper) {

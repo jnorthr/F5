@@ -1,6 +1,6 @@
 = F5 README
 jnorthr <james.northrop@orange.fr>
-V1.1, Updated 25 Mar.2018, ReadMe Notes for F5 CopyTools
+V1.1, Updated 25 Mar.2018, ReadMe Notes for F5 CopyTool
 :sectanchors:
 :sectlinks:
 :icons: font
@@ -20,7 +20,7 @@ V1.1, Updated 25 Mar.2018, ReadMe Notes for F5 CopyTools
 == Status
 
 *Travis C/I* Project Health -
-image:https://img.shields.io/travis/jnorthr/CopyTools.svg[Build Status (Travis CI), link=https://travis-ci.org/jnorthr/CopyTools]  image:https://img.shields.io/hexpm/l/plug.svg[Apache License, link=https://github.com/jnorthr/DoctorPepper/blob/master/LICENSE]
+image:https://img.shields.io/travis/jnorthr/F5.svg[Build Status (Travis CI), link=https://travis-ci.org/jnorthr/F5]  image:https://img.shields.io/hexpm/l/plug.svg[Apache License, link=https://github.com/jnorthr/DoctorPepper/blob/master/LICENSE]
 
 ''''
 
@@ -73,11 +73,11 @@ The code we write today and tomorrow will probably never run on a single process
  . Change directory \( cd \) into target folder location
  . Run this command to create a folder and copy down all the pieces :
 
-   git clone https://github.com/jnorthr/CopyTools.git
+   git clone https://github.com/jnorthr/F5.git
 
- . *cd CopyTools/*
+ . *cd F5/*
  . *./gradlew* runs defined tasks to build and test code samples
- . After prior step completes, examine *CopyTools/* folder to find the */build/* folder with test results
+ . After prior step completes, examine *F5/* folder to find the */build/* folder with test results
 
 ''''
 
