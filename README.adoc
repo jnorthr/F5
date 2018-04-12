@@ -1,0 +1,120 @@
+= F5 README
+jnorthr <james.northrop@orange.fr>
+V1.1, Updated 25 Mar.2018, ReadMe Notes for F5 CopyTools
+:sectanchors:
+:sectlinks:
+:icons: font
+:allow-uri-read:
+:imagesdir: ./images
+:linkattrs:
+:linkcss:
+:toc: right
+:toc-title: Document Index
+:icons: font
+:source-highlighter: coderay
+:docslink: http://gpars.org/[GPars Documentation]
+:description: GPars is a wonderful.
+
+// include::_includes/navbar2.txt[]
+
+== Status
+
+*Travis C/I* Project Health -
+image:https://img.shields.io/travis/jnorthr/CopyTools.svg[Build Status (Travis CI), link=https://travis-ci.org/jnorthr/CopyTools]  image:https://img.shields.io/hexpm/l/plug.svg[Apache License, link=https://github.com/jnorthr/DoctorPepper/blob/master/LICENSE]
+
+''''
+
+== Purpose
+
+A Gradle project for Groovy users who need utility code to copy text strings to system clipboards. Clone includes gradle build tool wrapper and folder structure like maven/gradle so you don't need an installed gradle build tool.
+ 
+image::divider3.png[align=center, title-align=center]
+
+''''
+
+== DropBox or Google Drive Enabled ?
+
+This trick works nicely if you have a shared drive service like *Dropbox*, or *Google Drive* etc. and all your internal systems use the same *Dropbox*,etc. account.
+
+On one of my least-used systems, did the following:
+
+.Gradle Continuous Doctor Translation
+[source,bash]
+----
+cd ~/Dropbox
+git clone https://github.com/jnorthr/DoctorPepper.git
+cd ~/Dropbox/DoctorPepper
+gradlew -t asciidoctor
+----
+
+The *-t* option keeps gradle running in continuous mode so now any changes i make to any asciidoctor files are near-instantly
+translated for me.
+
+''''
+
+NOTE: If you don't have a *git* client https://git-scm.com/downloads[click here to install one]
+
+''''
+
+image::F7.png[align=center, title-align=center]
+
+''''
+
+.This is a comment for the text that follows ?
+The code we write today and tomorrow will probably never run on a single processor system: parallel hardware has become standard.  Not so with the software though, at least not yet. 
+
+.Pre-requisites
+ . Working internet connection
+ . Installed Git client to copy/clone this repo
+ . Ability to use terminal console
+
+.Steps  
+ . Open terminal console
+ . Change directory \( cd \) into target folder location
+ . Run this command to create a folder and copy down all the pieces :
+
+   git clone https://github.com/jnorthr/CopyTools.git
+
+ . *cd CopyTools/*
+ . *./gradlew* runs defined tasks to build and test code samples
+ . After prior step completes, examine *CopyTools/* folder to find the */build/* folder with test results
+
+''''
+
+== Usage Notes
+
+The *Copier.groovy* source has methods to interact with the System Clipboard of most O/S types.
+
+=== Put text on System Clipboard 
+
+.Method Layout
+----
+public void copy(String s) 
+----
+
+This is a class method to do the deed. Call this method with a Java/Groovy or JVM language _String_ types to place that string on to the System Clipboard of the operating system. Only _String_ copies are supported.
+
+.Method Sample
+----
+Copier ck = new Copier();
+       ck.copy("Hi from me");
+----
+
+
+=== Get Text from System Clipboard 
+
+.Method Layout
+----
+public String paste() 
+----
+
+This is a class method to do the deed. Call this method with a Java/Groovy or JVM language to receive a _String_ type from System Clipboard of the operating system. Only _String_ copies are supported.
+
+.Method Sample
+----
+Copier ck = new Copier();
+def what = ck.paste();
+----
+
+
+

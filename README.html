@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.6.1">
+<meta name="description" content="GPars is a wonderful.">
+<meta name="author" content="jnorthr">
+<title>F5 README</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+<link rel="stylesheet" href="./coderay-asciidoctor.css">
+</head>
+<body class="article toc2 toc-right">
+<div id="header">
+<h1>F5 README</h1>
+<div class="details">
+<span id="author" class="author">jnorthr</span><br>
+<span id="email" class="email"><a href="mailto:james.northrop@orange.fr">james.northrop@orange.fr</a></span><br>
+<span id="revnumber">version 1.1,</span>
+<span id="revdate">Updated 25 Mar.2018, ReadMe Notes for F5 CopyTools</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Document Index</div>
+<ul class="sectlevel1">
+<li><a href="#_status">Status</a></li>
+<li><a href="#_purpose">Purpose</a></li>
+<li><a href="#_dropbox_or_google_drive_enabled">DropBox or Google Drive Enabled ?</a></li>
+<li><a href="#_usage_notes">Usage Notes</a>
+<ul class="sectlevel2">
+<li><a href="#_put_text_on_system_clipboard">Put text on System Clipboard</a></li>
+<li><a href="#_get_text_from_system_clipboard">Get Text from System Clipboard</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_status"><a class="anchor" href="#_status"></a><a class="link" href="#_status">Status</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>Travis C/I</strong> Project Health -
+<span class="image"><a class="image" href="https://travis-ci.org/jnorthr/CopyTools"><img src="https://img.shields.io/travis/jnorthr/CopyTools.svg" alt="Build Status (Travis CI)"></a></span>  <span class="image"><a class="image" href="https://github.com/jnorthr/DoctorPepper/blob/master/LICENSE"><img src="https://img.shields.io/hexpm/l/plug.svg" alt="Apache License"></a></span></p>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_purpose"><a class="anchor" href="#_purpose"></a><a class="link" href="#_purpose">Purpose</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A Gradle project for Groovy users who need utility code to copy text strings to system clipboards. Clone includes gradle build tool wrapper and folder structure like maven/gradle so you don&#8217;t need an installed gradle build tool.</p>
+</div>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img src="./images/divider3.png" alt="divider3">
+</div>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_dropbox_or_google_drive_enabled"><a class="anchor" href="#_dropbox_or_google_drive_enabled"></a><a class="link" href="#_dropbox_or_google_drive_enabled">DropBox or Google Drive Enabled ?</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This trick works nicely if you have a shared drive service like <strong>Dropbox</strong>, or <strong>Google Drive</strong> etc. and all your internal systems use the same <strong>Dropbox</strong>,etc. account.</p>
+</div>
+<div class="paragraph">
+<p>On one of my least-used systems, did the following:</p>
+</div>
+<div class="listingblock">
+<div class="title">Gradle Continuous Doctor Translation</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">cd ~/Dropbox
+git clone https://github.com/jnorthr/DoctorPepper.git
+cd ~/Dropbox/DoctorPepper
+gradlew -t asciidoctor</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <strong>-t</strong> option keeps gradle running in continuous mode so now any changes i make to any asciidoctor files are near-instantly
+translated for me.</p>
+</div>
+<hr>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you don&#8217;t have a <strong>git</strong> client <a href="https://git-scm.com/downloads">click here to install one</a>
+</td>
+</tr>
+</table>
+</div>
+<hr>
+<div class="imageblock" style="text-align: center">
+<div class="content">
+<img src="./images/F7.png" alt="F7">
+</div>
+</div>
+<hr>
+<div class="paragraph">
+<div class="title">This is a comment for the text that follows ?</div>
+<p>The code we write today and tomorrow will probably never run on a single processor system: parallel hardware has become standard.  Not so with the software though, at least not yet.</p>
+</div>
+<div class="olist arabic">
+<div class="title">Pre-requisites</div>
+<ol class="arabic">
+<li>
+<p>Working internet connection</p>
+</li>
+<li>
+<p>Installed Git client to copy/clone this repo</p>
+</li>
+<li>
+<p>Ability to use terminal console</p>
+</li>
+</ol>
+</div>
+<div class="olist arabic">
+<div class="title">Steps</div>
+<ol class="arabic">
+<li>
+<p>Open terminal console</p>
+</li>
+<li>
+<p>Change directory \( cd \) into target folder location</p>
+</li>
+<li>
+<p>Run this command to create a folder and copy down all the pieces :</p>
+<div class="literalblock">
+<div class="content">
+<pre>git clone https://github.com/jnorthr/CopyTools.git</pre>
+</div>
+</div>
+</li>
+<li>
+<p><strong>cd CopyTools/</strong></p>
+</li>
+<li>
+<p><strong>./gradlew</strong> runs defined tasks to build and test code samples</p>
+</li>
+<li>
+<p>After prior step completes, examine <strong>CopyTools/</strong> folder to find the <strong>/build/</strong> folder with test results</p>
+</li>
+</ol>
+</div>
+<hr>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_usage_notes"><a class="anchor" href="#_usage_notes"></a><a class="link" href="#_usage_notes">Usage Notes</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <strong>Copier.groovy</strong> source has methods to interact with the System Clipboard of most O/S types.</p>
+</div>
+<div class="sect2">
+<h3 id="_put_text_on_system_clipboard"><a class="anchor" href="#_put_text_on_system_clipboard"></a><a class="link" href="#_put_text_on_system_clipboard">Put text on System Clipboard</a></h3>
+<div class="listingblock">
+<div class="title">Method Layout</div>
+<div class="content">
+<pre>public void copy(String s)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is a class method to do the deed. Call this method with a Java/Groovy or JVM language <em>String</em> types to place that string on to the System Clipboard of the operating system. Only <em>String</em> copies are supported.</p>
+</div>
+<div class="listingblock">
+<div class="title">Method Sample</div>
+<div class="content">
+<pre>Copier ck = new Copier();
+       ck.copy("Hi from me");</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_text_from_system_clipboard"><a class="anchor" href="#_get_text_from_system_clipboard"></a><a class="link" href="#_get_text_from_system_clipboard">Get Text from System Clipboard</a></h3>
+<div class="listingblock">
+<div class="title">Method Layout</div>
+<div class="content">
+<pre>public String paste()</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is a class method to do the deed. Call this method with a Java/Groovy or JVM language to receive a <em>String</em> type from System Clipboard of the operating system. Only <em>String</em> copies are supported.</p>
+</div>
+<div class="listingblock">
+<div class="title">Method Sample</div>
+<div class="content">
+<pre>Copier ck = new Copier();
+def what = ck.paste();</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 1.1<br>
+Last updated 2018-04-12 15:09:35 CEST
+</div>
+</div>
+</body>
+</html>

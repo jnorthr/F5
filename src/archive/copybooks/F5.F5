@@ -1,0 +1,16 @@
+  // Feature Methods
+
+  // First Test
+  def "1st Test: Setup ${classname} method"() {
+    given:
+		println "1st Test: Use ${classname} to do this"
+ 
+    when:
+        obj.paste("set by ${classname}TestSpec");
+
+    then:
+    
+	// Asserts are implicit and not need to be stated.
+    	true == obj!=null;
+  } // end of test
+

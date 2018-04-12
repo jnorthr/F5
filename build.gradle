@@ -1,0 +1,113 @@
+/*
+ * This build file was copied by 'jim' at '18/2/18 15:18 PM' with Gradle 4.5 from Tools script in Google Drive
+ */
+
+// Apply the plugin to add support for Groovy
+apply plugin: 'groovy'
+apply plugin: 'application'
+
+defaultTasks 'clean', 'copybooks', 'build', 'test', 'groovydoc', 'update', 'runCopier', 'run' 
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    jcenter()
+}
+
+// In this section you declare the dependencies for your production and test code
+dependencies {
+    compile "org.codehaus.groovy:groovy-all:2.4.14"
+    runtime "org.codehaus.groovy:groovy-all:2.4.14"
+
+    // Declare the dependency for your favourite test framework you want to use in your tests.
+    // TestNG is also supported by the Gradle Test task. Just change the
+    // testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
+    // 'test.useTestNG()' to your build script.
+    testCompile 'junit:junit:4.12'
+    
+    // Spock Framework basic dependencies:
+    testCompile "org.codehaus.groovy:groovy-all:2.4.14"
+    // The version have to be compatible with Groovy:
+    testCompile "org.spockframework:spock-core:1.0-groovy-2.4"
+ 
+    // Optional dependencies Spock
+    // To use Hamcrest matchers:
+    testCompile "org.hamcrest:hamcrest-core:1.3"
+ 
+    // To mock classes:
+    testRuntime "cglib:cglib-nodep:3.1"
+    // Use with cglib to mock classes without default constructor:
+    testRuntime "org.objenesis:objenesis:2.1"
+}
+
+// for application plugin
+mainClassName = "io.jnorthr.toolkit.F5"
+
+test {
+    jvmArgs "-Dheadless=${project.hasProperty('headless') ? project.headless : true}"
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'io.jnorthr.toolkit.F5'
+    }
+}
+ 
+// run config.file existence checker task
+// Feature to confirm a configuration file exists or build a simple one if it does not
+task runCopier(type: JavaExec) {
+    main = "io.jnorthr.toolkit.Copier"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+// run F5 KeystrokeDemo task
+// Feature to demo accelerator keys in Swing
+task runF5(type: JavaExec) {
+    main = "io.jnorthr.toolkit.F5"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+// run IO task
+// Feature to get text from a file
+task runIO(type: JavaExec) {
+    main = "io.jnorthr.toolkit.IO"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+// run Example task
+// Feature to get text from a file
+task runTrans(type: JavaExec) {
+    main = "io.jnorthr.toolkit.Translator"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+// run Mapper task
+// Feature to get text from a file
+task runMapper(type: JavaExec) {
+    main = "io.jnorthr.toolkit.Mapper"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+// run TemplateMaker task
+// Feature to get text from a file
+task runTemplateMaker(type: JavaExec) {
+    main = "io.jnorthr.toolkit.TemplateMaker"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task update(type: Copy) {
+    from "${buildDir}/distributions"
+    into  file("distributions")
+    include 'CopyTools.*'
+    //exclude 'SkeletonTest.groovy'
+}
+
+task copybooks(type: Copy) {
+    from "${projectDir}/copybooks"
+    into  file("src/main/dist/copybooks")
+    include '*.F5'
+    include '*.txt'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion '4.6'
+}

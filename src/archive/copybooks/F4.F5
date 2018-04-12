@@ -1,0 +1,84 @@
+//package io.jnorthr.toolkit;
+//import io.jnorthr.toolkit.${classname};
+
+/*
+* see: http://code.google.com/p/spock/wiki/SpockBasics
+* A spock test wrapper around the base class
+*/
+import java.util.logging.Logger;
+import spock.lang.*
+import java.lang.*;
+
+/**
+  * Tests a tool to ${purpose}
+  */
+class ${classname}TestSpec extends Specification 
+{
+  // fields
+  ${classname} obj;
+  
+  // Fixture Methods
+  
+  // run before every feature method
+  def setup() 
+  { 
+      obj = new ${classname}();
+  }          
+
+  // run after every feature method
+  def cleanup() {}
+  
+  
+  // Note: The setupSpec() and cleanupSpec() methods may not reference instance fields.
+  def setupSpec() 
+  {
+  } // run before the first feature method
+  
+  
+  def cleanupSpec() {}   // run after the last feature method}
+
+
+/*
+Feature methods are the heart of a specification. They describe the features (properties, aspects) that you expect to find in the system under specification. By convention, feature methods are named with String literals. Try to choose good names for your feature methods, and feel free to use any characters you like!
+
+Conceptually, a feature method consists of four phases:
+
+ . Set up the feature's fixture
+ . Provide a stimulus to the system under specification
+ . Describe the response expected from the system
+ . Clean up the feature's fixture
+ . Whereas the first and last phases are optional, the stimulus and response phases are always present (except in interacting feature methods), and may occur more than once.
+
+*/
+
+  // Feature Methods
+
+  // First Test
+  def "1st Test: Setup ${classname} for ${purpose}"() {
+    given:
+  	println "1st Test: Use ${classname} to ${purpose}"
+ 
+    when:
+        obj.paste("set by ${classname}TestSpec");
+
+    then:
+    
+	// Asserts are implicit and not need to be stated.
+    	true == obj!=null;
+  } // end of test
+
+
+  // Second Test
+  def "2nd Test: Confirm ${classname} text is available from method"() {
+    given:
+  	println "2nd Test: Use ${classname}"
+ 
+    when:
+      	obj.paste("pasted by ${classname}TestSpec");
+
+    then:    
+	// Asserts are implicit and not need to be stated.
+	"pasted by ${classname}TestSpec" == obj.copy();
+  } // end of test
+  
+} // end of spec
