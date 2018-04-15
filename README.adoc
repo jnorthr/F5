@@ -1,6 +1,6 @@
 = F5 README
 jnorthr <james.northrop@orange.fr>
-V1.1, Updated 25 Mar.2018, ReadMe Notes for F5 CopyTool
+V1.1, Updated 25 Apr.2018, ReadMe Notes for F5 CopyTool
 :sectanchors:
 :sectlinks:
 :icons: font

@@ -73,13 +73,6 @@ task runIO(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
-// run Example task
-// Feature to get text from a file
-task runTrans(type: JavaExec) {
-    main = "io.jnorthr.toolkit.Translator"
-    classpath = sourceSets.main.runtimeClasspath
-}
-
 // run Mapper task
 // Feature to get text from a file
 task runMapper(type: JavaExec) {

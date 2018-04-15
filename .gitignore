@@ -2,4 +2,6 @@
 .gradle/
 .DS_Store
 build/
-.gradle/
+.gradle/4.6/
+.gradle
+
