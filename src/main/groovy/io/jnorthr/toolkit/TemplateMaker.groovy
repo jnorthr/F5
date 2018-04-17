@@ -221,6 +221,7 @@ class TemplateMaker implements ActionListener
      */
     private int ask() 
     {
+        if (filename=="A") { return 1; }
         //def jframe = new JFrame()
         String ss = "Do you want to construct a ${filename} template file now ? ";
         int answer = JOptionPane.showConfirmDialog(f, ss, "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);

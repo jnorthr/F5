@@ -10,6 +10,7 @@ import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.Font;
@@ -17,6 +18,9 @@ import java.awt.Color;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.*;
+
+import java.io.*;
 
 import javax.swing.border.LineBorder;
 import javax.swing.AbstractAction;
@@ -73,6 +77,12 @@ public class F5 extends JFrame {
 
     /** a handle to temp storage for just changed Function Key  */
 	String updatekey = null;
+
+	int windowX = 0;
+	int windowY = 0;
+	boolean ok = false;
+	LayoutManager H = new GridLayout(1, 0, 0, 0);
+	LayoutManager V = new GridLayout(0, 1, 0, 0);
     
     /**
      * A method to print an audit log if audit flag is true
@@ -168,8 +178,8 @@ public class F5 extends JFrame {
 		//setLayout(new BoxLayout(BoxLayout.X_AXIS));  //this, BoxLayout.X_AXIS));
 		//setLayout(new FlowLayout(FlowLayout.CENTER));
 		//BoxLayout bl = new BoxLayout(getContentPane(), BoxLayout.X_AXIS);
-		def bl = new GridLayout(1, 0, 0, 0);
-		setLayout(bl);
+		//def bl = new GridLayout(1, 0, 0, 0);
+		setLayout(H);
 
 		(1..12).eachWithIndex{ num, ix -> 
 			//say "... ix=$ix num=$num  F${num}" 
@@ -178,16 +188,31 @@ public class F5 extends JFrame {
 			add(b);
 		} // end of each
 
+		JButton b = makeButton("A");  
+		//buttons["A"] = b;
+		b.setText("\u21E7");
+		add(b);
+		b.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+  			{
+    			ok = !ok;
+    			if (ok) { setLayout(V); b.setText("\u21E8"); setSize(36, 400); this.setLocation(0, 60); }
+    			if (!ok) { setLayout(H); b.setText("\u21E7"); setSize(700, 46); this.setLocation(windowX, windowY);}
+    			validate();
+  			}
+		});
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(760, 56);
+		setSize(700, 46);
 		//validate();
 
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension windowSize = this.getSize();
 
-		int windowX = Math.max(0, (screenSize.width  - windowSize.width ) / 2);
-		int windowY = Math.max(0, (screenSize.height - windowSize.height) / 2);
-		windowY = screenSize.height - (windowSize.height+40);
+		windowX = Math.max(0, (screenSize.width  - windowSize.width ) / 2);
+		windowY = Math.max(0, (screenSize.height - windowSize.height) / 2);
+		windowY = screenSize.height - (windowSize.height+10);
 		//say "... windowSize.width=${windowSize.width} and windowSize.height=${windowSize.height}"
 		//say "... screenSize.width=${screenSize.width} and screenSize.height=${screenSize.height}"
 		this.setLocation(windowX, windowY);  // Don't use "f." inside constructor.
@@ -219,7 +244,15 @@ public class F5 extends JFrame {
 		} // end of if
 		else
 		{
-			mybutton.setForeground(Color.RED);			
+			if (key=="A")
+			{
+				mybutton.setFont(new Font("Arial", Font.BOLD, 14));
+				mybutton.setForeground(Color.MAGENTA);
+			}
+			else
+			{
+				mybutton.setForeground(Color.RED);
+			} // end of else			
 		} // end of else
 
 
@@ -228,9 +261,18 @@ public class F5 extends JFrame {
             public void mouseEntered(MouseEvent mEvt) 
             {
             	cleanup();
-				mybutton.setToolTipText( tooltips[key] );
-				setTitle("F5 -> Press ${key} function key to put ${tooltips[key]} on System Clipboard"); 
-    		}
+            	if (key!="A")
+            	{
+					mybutton.setToolTipText( tooltips[key] );
+					setTitle("F5 -> Press ${key} function key to put ${tooltips[key]} on System Clipboard");
+				} // end of if 
+				else
+				{
+					String s = (ok) ? "horizontally" : "vertically" ;
+					mybutton.setToolTipText( "Stack these buttons " + s );
+					setTitle("F5 -> click this to stack buttons up or across");
+				}
+    		} // end of mouse
 		});
 
 
@@ -262,18 +304,21 @@ public class F5 extends JFrame {
         		} // end of if
         		else
         		{
-					setTitle("F5 -> ${key} function key requires text to edit");  
-   					SwingUtilities.invokeLater(new Runnable() 
-    				{
-      					public void run()
-      					{
-      						// write new payload for this key
-							TemplateMaker obj = new TemplateMaker(key, true); 
-							updatekey = key;                   
-							setTitle("F5 -> ${key} - you need to edit text");  
-      					} // end of run
+        			if (key!="A")
+        			{
+						setTitle("F5 -> ${key} function key requires text to edit");  
+   						SwingUtilities.invokeLater(new Runnable() 
+    					{
+      						public void run()
+      						{
+      							// write new payload for this key
+								TemplateMaker obj = new TemplateMaker(key, true); 
+								updatekey = key;                   
+								setTitle("F5 -> ${key} - you need to edit text");  
+      						} // end of run
+	    				}); // end of invoke
 
-    				}); // end of invoke					
+    				} // end of if					
 				}
 			} // end of ActionPerformed
 		};
@@ -351,7 +396,6 @@ public class F5 extends JFrame {
     /**
      * Utility method to reset a single JButton after it's title and payload were updated.
      *
-     * @param  text string of function key pressed, i.e. F1,F4
      * @return void - no response 
      */
 	public void cleanup() 
