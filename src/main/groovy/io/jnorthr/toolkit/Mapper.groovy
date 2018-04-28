@@ -16,7 +16,6 @@ public class Mapper
     /** If null keys found within the template String, this will be true */ 
     boolean hasMap = false;
 
-
     /** If we need to println audit log to work, this will be true */ 
     boolean audit = false;
 
@@ -32,6 +31,15 @@ public class Mapper
     
 
     /**
+     * Non-Default constructor builds a tool 
+     */
+    public Mapper(boolean yn)
+    {
+        audit = yn;
+    } // end of non-default constructor
+
+
+    /**
      * A method to print an audit log if audit flag is true
      *
      * @param  is text to show user via println
@@ -43,31 +51,56 @@ public class Mapper
     } // end of method
     
 
+
+    /**
+     * A method to ask user for a value for one replacement variable
+     *
+     * @param  i is text name of this replacement variable to show user in dialog
+     * @return String value user provided
+     */
     private String prompt(String i) 
     {
         JFrame jframe = new JFrame()
         String ss = "Enter value for {${i}} parameter ";
-          String answer = JOptionPane.showInputDialog(jframe, ss)
-          jframe.dispose()
-          answer
+        String answer = JOptionPane.showInputDialog(jframe, ss)
+        jframe.dispose()
+        answer
     } // end of method
 
 
+    /**
+     * A method to look at a string for evidence of replacement variables needing values
+     *
+     * @param  s is text string of possible replacement variables that need values assigned to them in a dialog
+     * @return Map of found replacement variables as keys plus user 
+     */
     protected Map getMap(String s) 
     {
         tempText = s;
         Map map=[:]
         say s;
         int b = 0;
+        int kv = 0;
+        int k1 = 0;
+        int k2 = 0;
+        int k3 = 0;
+        int k4 = 0;
 
         def x = s.split('\\$')
         say "... x.size()="+x.size()
+        
+        x.each{xx->
+        	println "... xx=|${xx}|" 
+		}
+		println "\n------------------------\n"
+
         x.each{e-> 
-            b+=1;
+            b+=1; // count all 'x' entries
             say " and e=|${e}| (b=${b}) ";
             int k = (e.size() > 1) ? 1 : 0;
             String y = e.substring(0,k);
             say " & y=|${y}| ";
+
             if (y=='{')
             { 
                 say " has { "; 
@@ -82,6 +115,7 @@ public class Mapper
                         say " has y=|${y}| has y.size() ="+y.size();
                         if(map.containsKey(y))
                         {
+                            kv += 1;
                         }
                         else
                         {
@@ -92,6 +126,7 @@ public class Mapper
                             def ans = prompt(y); 
                             if (!(ans==null)) 
                             {
+                                kv += 1;
                 				ans = ans.trim();
                                 map[y]=ans;
 	                            say " added map[${y}] value of |${map[y]}|";
@@ -99,21 +134,27 @@ public class Mapper
                         } // end of else
                         
                     } // end of if
+                    else
+                    {
+                        k4 +=1 ;
+                    }
                         
                 }
                 else
                 {
-                    //if (b>1) {buff+='$';}
-                }
+                    k1+=1;
+                }                    
             } // end of if    
             else    
             {
-                //if (b>1) {buff+='$';}
+                k2+=1;
             } // end of else
 
+            k3+=1;
             say " ";
         } // end of each
         
+        say "... b="+b+" and kv="+kv+" k1="+k1+" k2="+k2+" k3="+k3+" k4="+k4;
         return map;
     } // end of method
 
@@ -148,7 +189,7 @@ public class Mapper
         println "Hello from Mapper.groovy"
         def s = '''Hello. My name is ${name} and live in ${country} with the name of ${name}.'''.toString();
 
-        Mapper ma = new Mapper();
+        Mapper ma = new Mapper(true);
         Map map = ma.getMap(s);
         
         println "----------------\neach:";
@@ -157,7 +198,7 @@ public class Mapper
         } // end of each
 
         s = ma.getTemplate(map);
-        println "----------------\ntemplate:\n"+s;
+        println "----------------\ntemplate:\n---------------------------\n"+s+"\n--------------------------";
 
 
         // second test
@@ -169,7 +210,7 @@ public class Mapper
         } // end of each
 
         s = ma.getTemplate(map);
-        println "----------------\ntemplate:\n"+s;
+        println "----------------\ntemplate:\n----------------------------\n"+s+"\n--------------------------";
 
 	s = '''This is F4.F5 code in
 the user folder using ${stuff} values.
@@ -190,7 +231,7 @@ public class ${classname}
         } // end of each
 
         s = ma.getTemplate(map);
-        println "----------------\ntemplate:\n"+s;
+        println "----------------\ntemplate:\n------------------------------\n"+s+"\n--------------------------";
 
         println "--- the end---"
     } // end of main 

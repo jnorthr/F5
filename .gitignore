@@ -2,7 +2,6 @@
 .gradle/
 .DS_Store
 build/
-.gradle/4.6/
+.gradle/4.7/
 .gradle
 .git/
-

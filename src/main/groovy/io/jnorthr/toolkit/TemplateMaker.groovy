@@ -150,12 +150,13 @@ class TemplateMaker implements ActionListener
 
         tooltip.setText(tx);
         jp2.add(tooltip);
-	f.addWindowListener( new WindowAdapter() {
-    	public void windowOpened( WindowEvent e )
-    		{
-		  tooltip.requestFocus();
+	    f.addWindowListener( new WindowAdapter() 
+        {
+    	   public void windowOpened( WindowEvent e )
+    	   {
+		      tooltip.requestFocus();
     		}
-	});
+	    });
 
         f.add(jp2, BorderLayout.NORTH);
         jp.setLayout(new GridLayout(4,1));
@@ -171,28 +172,28 @@ class TemplateMaker implements ActionListener
         b1.addActionListener(this);
         b1.setToolTipText( "Remove text in this panel" );
         b1.setOpaque(true);
-	b1.setBackground(Color.BLACK);
+    	b1.setBackground(Color.BLACK);
     	b1.setForeground(Color.BLUE);
 
         b2.addActionListener(this);
         b2.setToolTipText( "Paste text (\${x} unchanged) onto System Clipboard" );
         b2.setFont(font);
         b2.setOpaque(true);
-	b2.setBackground(Color.BLACK);
+	    b2.setBackground(Color.BLACK);
     	b2.setForeground(Color.BLUE);
         
         b3.addActionListener(this);
         b3.setToolTipText( "Save this text into ${filename}.F5 external file" );
         b3.setFont(font);
         b3.setOpaque(true);
-	b3.setBackground(Color.BLACK);
+	    b3.setBackground(Color.BLACK);
     	b3.setForeground(Color.BLUE);
         
         b4.addActionListener(this);
         b4.setToolTipText( "Quit this application" );
         b4.setFont(font);
         b4.setOpaque(true);
-	b4.setBackground(Color.BLACK);
+	    b4.setBackground(Color.BLACK);
     	b4.setForeground(Color.BLUE);
 
         jp.add(b1);

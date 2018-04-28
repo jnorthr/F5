@@ -81,9 +81,12 @@ public class F5 extends JFrame {
 	int windowX = 0;
 	int windowY = 0;
 	boolean ok = false;
+	boolean right = false;
 	LayoutManager H = new GridLayout(1, 0, 0, 0);
 	LayoutManager V = new GridLayout(0, 1, 0, 0);
-    
+	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    Dimension windowSize = null;
+
     /**
      * A method to print an audit log if audit flag is true
      *
@@ -197,7 +200,17 @@ public class F5 extends JFrame {
 			public void actionPerformed(ActionEvent e)
   			{
     			ok = !ok;
-    			if (ok) { setLayout(V); b.setText("\u21E8"); setSize(36, 400); this.setLocation(0, 60); }
+    			if (ok) 
+    			{ 
+    				setLayout(V); 
+    				b.setFont(new Font("Arial", Font.BOLD, 16));
+    				b.setText("\u21d4"); // 21E8
+    				setSize(36, 400); 
+    				right = !right;
+    				int j = (right) ? 0 : screenSize.width - 80;
+    				this.setLocation(j, 60); 
+    				windowSize = this.getSize();
+    				} // end of if
     			if (!ok) { setLayout(H); b.setText("\u21E7"); setSize(700, 46); this.setLocation(windowX, windowY);}
     			validate();
   			}
@@ -207,12 +220,11 @@ public class F5 extends JFrame {
 		setSize(700, 46);
 		//validate();
 
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		Dimension windowSize = this.getSize();
+		windowSize = this.getSize();
 
 		windowX = Math.max(0, (screenSize.width  - windowSize.width ) / 2);
 		windowY = Math.max(0, (screenSize.height - windowSize.height) / 2);
-		windowY = screenSize.height - (windowSize.height+10);
+		windowY = screenSize.height - (windowSize.height+25);
 		//say "... windowSize.width=${windowSize.width} and windowSize.height=${windowSize.height}"
 		//say "... screenSize.width=${screenSize.width} and screenSize.height=${screenSize.height}"
 		this.setLocation(windowX, windowY);  // Don't use "f." inside constructor.
@@ -234,7 +246,7 @@ public class F5 extends JFrame {
 		mybutton.setMargin(new Insets(0,-1,-3,0));
 		//mybutton.setPreferredSize(new Dimension(22, 15));
 
-		//mybutton.setBorder(new LineBorder(Color.BLACK,2));
+		mybutton.setBorder(new LineBorder(Color.GRAY,1));
 		mybutton.setBackground(Color.CYAN)
 
 		if (payloads[key])
@@ -256,6 +268,7 @@ public class F5 extends JFrame {
 		} // end of else
 
 
+		// logic to provide a tool tip for the function key with focus
 		mybutton.addMouseListener(new MouseAdapter() 
 		{
             public void mouseEntered(MouseEvent mEvt) 
@@ -264,7 +277,7 @@ public class F5 extends JFrame {
             	if (key!="A")
             	{
 					mybutton.setToolTipText( tooltips[key] );
-					setTitle("F5 -> Press ${key} function key to put ${tooltips[key]} on System Clipboard");
+					setTitle("F5 -> Press ${key} function key to put ${tooltips[key]} text on System Clipboard");
 				} // end of if 
 				else
 				{
@@ -345,23 +358,30 @@ public class F5 extends JFrame {
         		} // end of if
         		else
         		{
-					setTitle("F5 -> ${key} function key has no text for Clipboard");  
-					SwingUtilities.invokeLater(new Runnable() 
+        			if (key!="A") 
+        			{ 
+        				setTitle("F5 -> ${key} function key has no text for Clipboard"); 
+						SwingUtilities.invokeLater(new Runnable() 
+    					{
+      						public void run()
+      						{
+								TemplateMaker obj = new TemplateMaker(key); 
+								tooltip = io.getToolTip(key);
+								say "... ${key} function key has no text for Clipboard; tooltip=|${tooltip}|"
+								if (tooltip.trim().size() > 0)
+								{
+							    	map[key] = tooltip;
+									setTitle("F5 -> ${key} function key built text for ${tooltip}");  
+									mybutton.setForeground(Color.BLUE);
+									mybutton.setFont(new Font("Arial", Font.BOLD, 12)); 
+								}  // end of if							                   
+      						} // end of run
+    					});
+    				} // end of if					
+    				else
     				{
-      					public void run()
-      					{
-							TemplateMaker obj = new TemplateMaker(key); 
-							tooltip = io.getToolTip(key);
-							say "... ${key} function key has no text for Clipboard; tooltip=|${tooltip}|"
-							if (tooltip.trim().size() > 0)
-							{
-						    	map[key] = tooltip;
-								setTitle("F5 -> ${key} function key built text for ${tooltip}");  
-								mybutton.setForeground(Color.BLUE);
-								mybutton.setFont(new Font("Arial", Font.BOLD, 12)); 
-							}  // end of if							                   
-      					} // end of run
-    				});					
+						setTitle(""); 
+    				} // end of else
         		} // end of else
 
         		// these don't change color
