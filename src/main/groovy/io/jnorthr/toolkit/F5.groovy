@@ -101,9 +101,11 @@ public class F5 extends JFrame {
 
     /**
      * A method to get known tooltip text from external file named after a function key; so 
-     * tooltip text is help in F2.txt for the F2 function key; F11.txt for F11 function key.
+     * tooltip text for help in F2.txt is for the F2 function key and F2.F5 holds payload; or
+     * F11.txt holds tip for F11 function key while F11.F5 should have the text we copy to 
+     * clipboard if/when F11 key is pressed (or clicked).
      *
-     * Note that these .txt files are made in the TemplateMaker class
+     * Note that these simple .txt files are made in the TemplateMaker class
      *
      * @return map of known tooltips per function key
      */
@@ -160,6 +162,7 @@ public class F5 extends JFrame {
 			} // end of ActionPerformed
 		};
 
+		// tied to ESC button; when you hover over ESC choice, this tooltip is shown
 		quitbutton.addMouseListener(new MouseAdapter() 
 		{
             public void mouseEntered(MouseEvent mEvt) 
@@ -170,9 +173,13 @@ public class F5 extends JFrame {
 
 		//quitbutton.setPreferredSize(new Dimension(20, 16));
 		quitbutton.setFont(new Font("Arial", Font.BOLD, 10));
-		quitbutton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(stroke, "Quit");
+		quitbutton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(stroke, "Quit");		// this marries the quitAction to the ESC button		// this marries the quitAction to the ESC button
+
+		// this marries the quitAction to the ESC button
 		quitbutton.getActionMap().put("Quit", quitAction);
 		quitbutton.setAction(quitAction); // when button mouse clicked
+
+		// this marries the quitAction event to the keyboard ESC button
 		quitAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_ESCAPE);
 		add(quitbutton);
 
@@ -210,7 +217,7 @@ public class F5 extends JFrame {
     				int j = (right) ? 0 : screenSize.width - 80;
     				this.setLocation(j, 60); 
     				windowSize = this.getSize();
-    				} // end of if
+    			} // end of if
     			if (!ok) { setLayout(H); b.setText("\u21E7"); setSize(700, 46); this.setLocation(windowX, windowY);}
     			validate();
   			}
@@ -336,13 +343,14 @@ public class F5 extends JFrame {
 			} // end of ActionPerformed
 		};
 
-
+		// here's logic to copy payload text for one function key that's been prsssed to clipboard
 		Action myAction = new AbstractAction("${key}") {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
 				say("\n${key} myAction run when ${key} function key pressed ...");
 				cleanup();
 
+				// ok, get xxx.F5 text content, do any replacements using groovy template engine
         		String tx = io.getPayload(key);
         		if (tx.length() > 0)
         		{
@@ -351,11 +359,14 @@ public class F5 extends JFrame {
         			Map map = ma.getMap(tx);
         			tx = ma.getTemplate(map);
 
+        			// time to put fully translated text string onto system clipboard
         			Copier ck = new Copier();
         			ck.paste(tx);
 					setTitle("F5 -> ${key} copied ${tx.length()} bytes to Clipboard for ${tooltips[key]}"); 
 					//setTitle("F5 -> ${key} function key copied ${tx.length()} bytes to Clipboard");  
         		} // end of if
+
+        		// when no xxx.F5 file found in user home folder or it's empty, logic comes here
         		else
         		{
         			if (key!="A") 

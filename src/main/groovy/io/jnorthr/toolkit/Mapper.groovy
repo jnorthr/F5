@@ -90,9 +90,9 @@ public class Mapper
         say "... x.size()="+x.size()
         
         x.each{xx->
-        	println "... xx=|${xx}|" 
+        	say "... xx=|${xx}|" 
 		}
-		println "\n------------------------\n"
+		say "\n------------------------\n"
 
         x.each{e-> 
             b+=1; // count all 'x' entries

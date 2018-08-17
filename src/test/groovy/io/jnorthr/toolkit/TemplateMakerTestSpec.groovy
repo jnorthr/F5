@@ -51,10 +51,10 @@ Conceptually, a feature method consists of four phases:
   // First Test
   def "1st Test: Setup TemplateMaker for copy to system clipboard"() {
     given:
-  	  println "1st Test: Use TemplateMaker to save text for system clipboard"
+  		println "1st Test: Use TemplateMaker to save text for system clipboard"
     
     when:
-      TemplateMaker tm = new TemplateMaker();
+      	TemplateMaker tm = new TemplateMaker();
 
     then:
 		  // Asserts are implicit and not need to be stated.
@@ -66,15 +66,15 @@ Conceptually, a feature method consists of four phases:
   def "2nd Test: Confirm TemplateMaker to capture text for system clipboard "() {
     given:
   		println "2nd Test: Use TemplateMaker to paste text on system clipboard"
-      TemplateMaker tm = new TemplateMaker();
+      	TemplateMaker tm = new TemplateMaker();
  
     when:
-      //tm.paste("pasted by TemplateMakerTestSpec");
-      String s = tm.getChoice();
-      println "... found s=|${s}|"
+      	boolean ok = tm.paste("pasted by TemplateMakerTestSpec");
+      	println "... 2nd Test ok="+ok;
+
     then:    
-  	// Asserts are implicit and not need to be stated.
-	null != s;
+  		// Asserts are implicit and not need to be stated.
+		ok == true;
   } // end of test
   
 } // end of spec

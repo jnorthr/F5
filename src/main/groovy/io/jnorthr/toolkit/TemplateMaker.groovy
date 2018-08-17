@@ -8,8 +8,13 @@ import java.io.*;
 import java.awt.event.*;
 import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 import io.jnorthr.toolkit.IO;
+import io.jnorthr.toolkit.Copier;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import java.awt.event.KeyEvent;
 
 /*
  * Class to gain text for this function key and save it with known filename.F5 
@@ -57,6 +62,9 @@ class TemplateMaker implements ActionListener
 
     /** If we need to do a System.exit(0), this will be true else disposes of jframe and returns to caller */ 
     boolean exitOnClose = true;
+
+    /** a hook to use of the Escape key */
+    KeyStroke stroke = KeyStroke.getKeyStroke("ESCAPE");
 
 
     /**
@@ -176,7 +184,7 @@ class TemplateMaker implements ActionListener
     	b1.setForeground(Color.BLUE);
 
         b2.addActionListener(this);
-        b2.setToolTipText( "Paste text (\${x} unchanged) onto System Clipboard" );
+        b2.setToolTipText( "Paste text (unchanged) onto System Clipboard" );
         b2.setFont(font);
         b2.setOpaque(true);
 	    b2.setBackground(Color.BLACK);
@@ -189,8 +197,36 @@ class TemplateMaker implements ActionListener
 	    b3.setBackground(Color.BLACK);
     	b3.setForeground(Color.BLUE);
         
-        b4.addActionListener(this);
-        b4.setToolTipText( "Quit this application" );
+        Action quitAction = new AbstractAction("ESC") {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+            	say("\nQuit quitAction run when ESCAPE function key WAS pressed ...");
+            	if (exitOnClose)
+            	{
+	            	f.dispose();
+                	System.exit(0);
+            	}
+	            else
+    	        {
+        	        f.dispatchEvent(new WindowEvent(f, WindowEvent.WINDOW_CLOSING));
+            	} // end of else
+                	
+            } // end of ActionPerformed
+        };
+
+        b4.addMouseListener(new MouseAdapter() 
+        {
+            public void mouseEntered(MouseEvent mEvt) 
+            {
+                b4.setToolTipText( "ESC key will quit this app" );
+            }
+        });
+
+        b4.getActionMap().put("Quit", quitAction);
+        b4.setAction(quitAction); // when button mouse clicked
+        b4.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(stroke, "Quit");
+        quitAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_ESCAPE);
+        //b4.setToolTipText( "Quit this application" );
         b4.setFont(font);
         b4.setOpaque(true);
 	    b4.setBackground(Color.BLACK);
@@ -201,12 +237,15 @@ class TemplateMaker implements ActionListener
         jp.add(b3);
         jp.add(b4);
 
-        //def ks = KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0);
-        //b2.setAccelerator(ks);
+        b1.setMnemonic(KeyEvent.VK_C);
+        //def ks = KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0);
+        //b1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, ActionEvent.SHIFT_MASK )); // , ActionEvent.SHIFT_MASK
+        //b1.setAccelerator(ks);
 
         jp.setSize(20,60)
         f.add(jp,BorderLayout.EAST);  
-        b2.addActionListener(this);
+        //b2.addActionListener(this);
+        //b4.addActionListener(this);
 
         //f.add(b2);  
         f.setSize(800,300);  
@@ -243,6 +282,32 @@ class TemplateMaker implements ActionListener
 
 
     /**
+     * A method to stuff text onto system clipboard
+     *
+     * @param  text is string to go on system clipboard
+     * @return boolean true if all was ok or false if not
+     */
+    public boolean paste(String text)
+    {
+        println("... use TemplateMaker to paste text to clipboard"+text);
+        boolean ok = true;
+        // paste
+        try
+        { 
+            Copier co = new Copier();
+            co.paste(text);
+            println("... TemplateMaker pasted ok");
+        } // end of try
+        catch (Exception e) 
+        {
+            println("... failed to paste text to clipboard"+e.getMessage());
+            ok = false;
+        }
+        return ok;
+    } // end of method
+
+
+    /**
      * GUI actionPerformed logic to handle button presses 
      *
      * @param  ActionEvent e that caused this action - probably a JButton
@@ -266,9 +331,10 @@ class TemplateMaker implements ActionListener
             String s2 = area.getText();
             co.paste(s2);
             File sourceimage = new File("images/check.png");
+            b3.setIcon(null);
             if (sourceimage.exists() )
             {
-	        Image image = ImageIO.read(sourceimage);    
+    	        Image image = ImageIO.read(sourceimage);    
     	        b2.setIcon(new ImageIcon(image));
     	    } // end of if
 
@@ -277,9 +343,11 @@ class TemplateMaker implements ActionListener
         // save: use IO code to write new template payload
         if(e.getSource()==b3)
         { 
+            b2.setIcon(null);
             String s1 = area.getText();
             //area.setText( " ");
             IO ck = new IO();
+            assert filename!=null;
             String fi = filename.trim()+".F5"
             String tx = ck.write(fi, s1);
 
@@ -291,8 +359,8 @@ class TemplateMaker implements ActionListener
             File sourceimage = new File("images/check.png");
             if (sourceimage.exists())
             {
-	        Image image = ImageIO.read(sourceimage);    
-    	        b3.setIcon(new ImageIcon(image));
+	           Image image = ImageIO.read(sourceimage);    
+    	       b3.setIcon(new ImageIcon(image));
     	    }
         } // end of if
 
@@ -339,7 +407,7 @@ class TemplateMaker implements ActionListener
                 if (name in fk )
                 {
                     // get the user's input. note that if they press Cancel, 'name' will be null
-                    System.out.printf("The user's name is '%s'.\n", name);
+                    say("The user's name is '${name}'.\n");
                     ok = false;
                 }
                 else
@@ -378,7 +446,7 @@ class TemplateMaker implements ActionListener
                 {
                     //println "TemplateMaker F14 updating ..."
                     //obj=new TemplateMaker("F14","some text here\nas payload");                    
-                    def obj=new TemplateMaker();                    
+                    def obj=new TemplateMaker("F1");                    
                     String s = obj.getChoice();
                     obj.filename = s;
                     println "... s=|${s}|"
@@ -387,8 +455,11 @@ class TemplateMaker implements ActionListener
                         println "... doing setup()"
                         obj.setup();    
 
-                    } // end of if
-
+                    } // end of if          
+                    
+                    obj = new TemplateMaker();
+                    boolean ok = obj.paste("pasted by TemplateMaker Test 2");
+                    println "... 2nd Test ok="+ok;
                     //System.exit(0);
                 } // end of run()
             } // end of runnable
