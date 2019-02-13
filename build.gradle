@@ -15,8 +15,8 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile "org.codehaus.groovy:groovy-all:2.5.1"
-    runtime "org.codehaus.groovy:groovy-all:2.5.1"
+    compile "org.codehaus.groovy:groovy-all:2.5.6"
+    runtime "org.codehaus.groovy:groovy-all:2.5.6"
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the
@@ -25,7 +25,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 
     // Spock Framework basic dependencies:
-    testCompile "org.codehaus.groovy:groovy-all:2.5.1"
+    testCompile "org.codehaus.groovy:groovy-all:2.5.6"
     // The version have to be compatible with Groovy:
     testCompile "org.spockframework:spock-core:1.0-groovy-2.4"
 
@@ -101,6 +101,15 @@ task update(type: Copy) {
     //exclude 'SkeletonTest.groovy'
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion '4.9'
+// Configuring the wrapper, the new way (since Gradle 4.8) 
+// see https://docs.gradle.org/current/userguide/gradle_wrapper.html#customizing_wrapper
+wrapper{
+    gradleVersion = '5.2.1'
+    distributionType = Wrapper.DistributionType.BIN
 }
+
+/*
+task wrapper(type: Wrapper) {
+    gradleVersion '5.2.1'
+}
+*/
