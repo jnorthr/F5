@@ -55,6 +55,7 @@ public class Copier
      */
     public void paste(String s) 
     {
+        say "... Copier paste() putting "+s.size()+" bytes on clipboard"
         ClipboardOwner owner = null;
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         Transferable transferable = new StringSelection(s);
@@ -72,6 +73,7 @@ public class Copier
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         DataFlavor flavor = DataFlavor.stringFlavor;
         String text = " - could not paste from clipboard"
+        say "... Copier copy() reading payload of  "+text.size()+" bytes from system clipboard"
         if (clipboard.isDataFlavorAvailable(flavor)) 
         {
             try 
@@ -103,10 +105,12 @@ public class Copier
         Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
         if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor))
         {
+          say "... Copier copyImageFromClipboard() reading image from system clipboard"
           return (Image) transferable.getTransferData(DataFlavor.imageFlavor);
         }
         else
         {
+          say "... Copier copyImageFromClipboard() did not find an imageFlavor on system clipboard"
           return null;
         }
     } // end of method

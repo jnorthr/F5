@@ -76,4 +76,18 @@ Conceptually, a feature method consists of four phases:
 		null == s;
   } // end of test
   
+  // Third Test
+  def "3rd Test: Confirm F5 can get available tooltips, if any "() {
+    given:
+        println "3rd Test: Use F5 to get any available tooltips"
+        F5 tm = new F5();
+ 
+    when:
+      def m = tm.getAvailableTooltips();
+
+    then:    
+      // Asserts are implicit and not need to be stated.
+      m instanceof Map ;
+  } // end of test
+  
 } // end of spec

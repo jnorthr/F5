@@ -12,9 +12,10 @@ defaultTasks 'clean', 'build', 'test', 'groovydoc', 'update', 'runCopier', 'run'
 repositories {
     jcenter()
 }
-
 // In this section you declare the dependencies for your production and test code
 dependencies {
+    //compile files("/opt/jdk1.7.0_40/jre/lib/rt.jar") cant find where to get rt.jar !
+
     compile "org.codehaus.groovy:groovy-all:2.5.6"
     runtime "org.codehaus.groovy:groovy-all:2.5.6"
 
@@ -104,12 +105,12 @@ task update(type: Copy) {
 // Configuring the wrapper, the new way (since Gradle 4.8) 
 // see https://docs.gradle.org/current/userguide/gradle_wrapper.html#customizing_wrapper
 wrapper{
-    gradleVersion = '5.2.1'
+    gradleVersion = '5.3.1'
     distributionType = Wrapper.DistributionType.BIN
 }
 
 /*
 task wrapper(type: Wrapper) {
-    gradleVersion '5.2.1'
+    gradleVersion '5.3.1'
 }
 */

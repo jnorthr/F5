@@ -2,6 +2,8 @@
 .gradle/
 .DS_Store
 build/
-.gradle/4.7/
+.gradle/*
 .gradle
 .git/
+distributions/F5/bin
+distributions/F5/images
