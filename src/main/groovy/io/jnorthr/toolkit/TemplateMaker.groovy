@@ -24,8 +24,8 @@ class TemplateMaker implements ActionListener
     /** a handle for our GUI framework */
     def f = new JFrame();
 
-    /** a simple name, like F12, for our function key filename */
-    String filename = "F1";
+    /** a simple function key name, like F15, populates the function key filename */
+    String filename = "F15";
 
     /** a button to remove existing text in our GUI */
     JButton b1 = new JButton("Clear");
@@ -105,24 +105,6 @@ class TemplateMaker implements ActionListener
 
 
     /**
-     * Non-Default constructor builds a tool to get payload text for this function key and save in a file
-     *
-     * @param  fn String of text declaring which key this run is for like F7 
-     * @param  ok boolean to trigger initial creation of a text file for this 'fn' 
-     * @return a tool to enter payload text for function key 'fn' and save in a file
-     */
-    public TemplateMaker(String fn, boolean ok)
-    {
-        f.setTitle("F5 -> Build a payload for this ${fn} key"); 
-        filename = fn;
-        exitOnClose = false;
-        payload = "";
-        setup();
-        //f.dispose();
-    } // end of constructor
-
-
-    /**
      * Non-Default constructor builds a tool to get payload text plus title for this function key and save in a file
      *
      * @param  fn String of text declaring which key this run is for like F7 
@@ -133,15 +115,30 @@ class TemplateMaker implements ActionListener
     {
         f.setTitle("F5 -> Edit the payload for this ${fn} key"); 
         exitOnClose = false;
-        filename = fn;
-        payload = data;
-        setup();    
+        filename = fn.trim();
+        boolean yn = filename < "F1" || filename > "F12";
+        if (yn)
+        {
+            println "... can not setup() TemplateMaker as function key |${filename}| invalid"
+            filename ="F15" // reset default
+        }
+        else
+        {
+            payload = data;
+            setup();
+        } // end of else
+
     } // end of constructor
 
 
+
+    /**
+     * @param  key String of text declaring which function key this run is for like F7 
+     * 
+     */
     public void setup(String key)
     {
-        println "... TemplateMaker doing setup(${key}) for key ";
+        println "... TemplateMaker doing setup() for key ${key}";
         filename = key;
         setup();
     }
@@ -154,7 +151,7 @@ class TemplateMaker implements ActionListener
     public void setup()
     {
         //UIManager.getCrossPlatformLookAndFeelClassName();
-        println "... TemplateMaker doing setup() for key "+filename;
+        println "... TemplateMaker doing setup() for current function key "+filename;
         jp2.add(new JLabel("Function key :"));
         functionkey.setText(filename);
         functionkey.setEditable(false); 
@@ -165,7 +162,7 @@ class TemplateMaker implements ActionListener
         // ask for prior tooltip from .txt file, if any
         IO io = new IO();
         String tx = io.getToolTip(filename);
-        println "... TemplateMaker getting tooltip of "+tx;
+        println "... TemplateMaker getting filename ${filename} tooltip of "+tx;
     
         tooltip.setText(tx); 
         jp2.add(tooltip);
@@ -174,7 +171,7 @@ class TemplateMaker implements ActionListener
     	   public void windowOpened( WindowEvent e )
     	   {
 		      tooltip.requestFocus(); // gui sets initial focus on tooltip text field
-    		}
+    	   }
 	    });
 
         // gui top for function key plus tooltip input
@@ -275,7 +272,7 @@ class TemplateMaker implements ActionListener
         f.setSize(800,300);  
         //f.setLayout(null);  
         f.setVisible(true);      
-    }
+    } // end of method
     
 
     /**
@@ -370,7 +367,7 @@ class TemplateMaker implements ActionListener
         { 
             b2.setIcon(null);
             // build payload text file name here, i.e. F11.txt
-            IO ck = new IO();
+            IO io = new IO();
             assert filename!=null;
             String fi = filename.trim()+".txt"
 
@@ -389,12 +386,12 @@ class TemplateMaker implements ActionListener
                 payload = "|"+tt.trim()+"|"+area.getText();  
             } // end of if
 
-            tx = ck.write(fi, payload ); 
+            tx = io.write(fi, payload ); 
             say "... wrote ${fi} file with ${payload.size()} bytes; result was ${tx}";
 
             // erase fields
-            //area.setText( " ");
-            //tooltip.setText( " ");
+            // area.setText( " ");
+            // tooltip.setText( " ");
 
             // get checkmark .png image then place on SAVE button
             File sourceimage = new File("images/check.png");
@@ -406,7 +403,7 @@ class TemplateMaker implements ActionListener
         } // end of if
 
         // exit button when clicked or ESC key hit
-        if(e.getSource()==b4)
+        if(e.getSource() == b4)
         { 
             if (exitOnClose)
             {
@@ -434,7 +431,7 @@ class TemplateMaker implements ActionListener
         JFrame frame = new JFrame("Choose a Function Key");
         boolean ok = true;
         String name = "";
-        def fk = ["F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12"]
+        def fk = ["F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","F13"] // test F13 or shift F1
 
         while(ok)
         {
@@ -479,29 +476,41 @@ class TemplateMaker implements ActionListener
     public static void main(String[] args)
     {
         println "TemplateMaker starting ..."
+        Date date = new Date()
 
         SwingUtilities.invokeLater(new Runnable() 
-            {
+        {
                 @Override
                 public void run() 
                 {
-                    //println "TemplateMaker F14 updating ..."
-                    //obj=new TemplateMaker("F14","some text here\nas payload");                    
-                    def obj=new TemplateMaker();                    
-                    String s = obj.getChoice();
-                    obj.filename = s;
-                    println "... s=|${s}|"
+                    println "... TemplateMaker F16 updating Test 1 ..."
+                    def f16 = new TemplateMaker("F16","this f16 text was updated by TemplateMaker\ntest one in main() method\non ${date}");                    
+                    
+                    // try default function key test 2 of file F15.txt
+                    println " "
+                    println "... TemplateMaker() Test 2"
+                    def f15 = new TemplateMaker();                    
+                    String s = f15.getChoice();
+                    f15.filename = s; 
+                    println "... user wants |${s}| and f15.filename=|${f15.filename}|"
                     if (s!=null)
                     {
-                        println "... doing setup()"
-                        obj.setup(s);    
+                        println "... doing f15.setup()"
+                        f15.setup(s);    
 
                     } // end of if          
                     
-                    //obj = new TemplateMaker("F24");
-                    //boolean ok = obj.paste("pasted by TemplateMaker Test 2");
-                    //println "... 2nd Test ok="+ok;
-                    //System.exit(0);
+                    println " "
+                    println "... TemplateMaker(F18) Test 3"
+                    def f18 = new TemplateMaker("F18");
+                    boolean ok = f18.paste("F18 file ${f18.filename} pasted by TemplateMaker Test 3 on ${date}");
+                    println "... 3rd Test said that on ${date} ok="+ok;
+
+                    println " "
+                    println "... TemplateMaker F17 update with bad function key value - Test 4"
+                    f16 = new TemplateMaker("F17 tooltip","this f17 text was updated by TemplateMaker\ntest one in main() method\non ${date}");                    
+
+                    System.exit(0);
                 } // end of run()
             } // end of runnable
         );

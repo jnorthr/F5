@@ -68,12 +68,9 @@ Conceptually, a feature method consists of four phases:
   		println "2nd Test: Use F5 to paste text on system clipboard"
         F5 tm = new F5();
  
-    when:
-    	def s = tm.setVisible(true);
-
-    then:    
+    expect:    
   		// Asserts are implicit and not need to be stated.
-		null == s;
+		null != tm;
   } // end of test
   
   // Third Test

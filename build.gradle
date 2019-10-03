@@ -60,10 +60,35 @@ task runCopier(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+
+// run ButtonMaker task
+// Feature to demo building a JButton with action() using Swing
+task runButtonMaker(type: JavaExec) {
+    main = "io.jnorthr.toolkit.ButtonMaker"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+
 // run F5 KeystrokeDemo task
 // Feature to demo accelerator keys in Swing
 task runF5(type: JavaExec) {
     main = "io.jnorthr.toolkit.F5"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+
+// run F5Data task
+// Feature to declare defs used in the F5 class
+task runF5Data(type: JavaExec) {
+    main = "io.jnorthr.toolkit.F5Data"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+
+// run F5GUI task
+// Feature to see JFrame used in the F5GUI class
+task runF5GUI(type: JavaExec) {
+    main = "io.jnorthr.toolkit.F5GUI"
     classpath = sourceSets.main.runtimeClasspath
 }
 
@@ -105,12 +130,12 @@ task update(type: Copy) {
 // Configuring the wrapper, the new way (since Gradle 4.8) 
 // see https://docs.gradle.org/current/userguide/gradle_wrapper.html#customizing_wrapper
 wrapper{
-    gradleVersion = '5.3.1'
+    gradleVersion = '5.5.1'
     distributionType = Wrapper.DistributionType.BIN
 }
 
 /*
 task wrapper(type: Wrapper) {
-    gradleVersion '5.3.1'
+    gradleVersion '5.5.1'
 }
 */

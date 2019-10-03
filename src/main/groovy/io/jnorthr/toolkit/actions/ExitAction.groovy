@@ -1,4 +1,4 @@
-package io.jnorthr.toolkit;
+package io.jnorthr.toolkit.actions;
 
 import java.awt.*;
 import java.awt.event.*;

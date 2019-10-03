@@ -13,6 +13,13 @@ import groovy.transform.*;
 
 /*
  * Feature to get text from remote URL.
+ *
+ * The initial text in the target file can have a tooltip  for a given key. It must be the first
+ * text and surrounded by | characters. So text like :
+ *
+ * |This is tooltip to show when user hovers mouse over GUI key|Here is text copied to your clipboard 
+ * when this function key is pressed
+ *
  */
 //@Slf4j
 @Canonical
@@ -26,7 +33,7 @@ public class URL
 
     /** an O/S specific location for the user's home folder name plus a trailing file separator and 
     name of file holding payload text; */ 
-    String fn = home+"copybooks"+fs+"F15.F5";
+    String fn = home+"copybooks"+fs+"F15.txt";
 
     /** If DollarSign {} keys found within the template String, this will be true */ 
     boolean hasMap = false;
@@ -66,28 +73,30 @@ public class URL
     {
     	// see if given filename has path separator; if not assume 'fn' is simple
     	// name that needs home folder and path name added to it;
-		def ix = fn.indexOf(fs);
-		if (ix<0)
-		{
-			fn= home+"copybooks"+fs+fn;
-			say "... added home and folder name to filename given"
-		}
+		  def ix = fn.indexOf(fs);
+		  if (ix<0)
+		  {
+			   fn= home+"copybooks"+fs+fn;
+			   say "... added home and folder name to filename given"
+		  } // end of if
 
     	File fi = new File(fn)
     	if (!fi.exists())
     	{
-    		say "... could not find payload named "+fn;
-    		return null;
+    	   say "... could not find payload named "+fn;
+    	   return null;
     	} // end of if
 
 	    def line  
-        String tx=fi.text;
+      String tx=fi.text;
     	
     	new File(fn).withReader { line = it.readLine() }  
+
     	say line  
     	line = line.trim()
     	say line  
-    	if (line.startsWith(":") && line.endsWith(":"))
+    	
+      if (line.startsWith("|") && line.endsWith("|"))
     	{
 	        def xx = line.substring(1,line.length()-1 )
     	    xx=xx.trim()
@@ -120,9 +129,19 @@ public class URL
     {
         println "Hello from URL.groovy"
         URL obj = new URL();
+        println "... getting text from file:"+obj.fn;
 
         String ans = obj.getRemote(obj.fn);
-        println "... ans.length()="+ans.length();
+
+        if (ans==null)
+        {
+          println "... did not find file "+obj.fn;
+        }
+        else
+        {
+          println "... ans.length()="+ans.length();
+        }
+
         //assert ans.size() == 63;
         obj.say("Hello from URL class");
 
