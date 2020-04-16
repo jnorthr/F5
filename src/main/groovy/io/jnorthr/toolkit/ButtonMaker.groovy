@@ -3,7 +3,7 @@ package io.jnorthr.toolkit;
 import io.jnorthr.toolkit.F5Data;
 import io.jnorthr.toolkit.F5GUI;
 import io.jnorthr.toolkit.Copier;
-import io.jnorthr.toolkit.IO;
+//import io.jnorthr.toolkit.IO;
 import io.jnorthr.toolkit.Mapper;
 
 import io.jnorthr.toolkit.actions.EditAction;
@@ -41,7 +41,7 @@ public class ButtonMaker
 	* a key/value map storage for known boilerplate variables of 'payloads' below that can be copied to 
 	* system clipboard; key is like F12 or F2 while value is true if payload text exists  
     	*/
-    	F5Data f5 = new F5Data();
+    	F5Data f5data = new F5Data();
 
 
 	/**
@@ -59,10 +59,10 @@ public class ButtonMaker
 	/**
      	* Default constructor to build a JButton instance
      	*/
-	public ButtonMaker(F5GUI f5g, F5Data f5d)
+	public ButtonMaker(F5Data f5d)
 	{
-		f5 = f5d;
-		f5gui = f5g;
+		f5data = f5d;
+		//f5gui = f5g;
 	} // end of constructor
 	
    	/**
@@ -79,7 +79,7 @@ public class ButtonMaker
 		mybutton.setFont(new Font("Arial", Font.PLAIN, 12));
 		mybutton.setBorder(new LineBorder(Color.BLACK,1));
 
-		if (f5.hasPayload[key])
+		if (f5data.hasPayload[key])
 		{
 			mybutton.setForeground(Color.BLACK);
 			mybutton.setBackground(Color.YELLOW);
@@ -105,7 +105,7 @@ public class ButtonMaker
 
 
 		/**
-		 * logic to provide a tool tip for the function key with focus
+		 * logic to provide a tool tip for the function key with focus when the F5 class is running 
 		 */
 		mybutton.addMouseListener(new MouseAdapter() 
 		{
@@ -114,21 +114,21 @@ public class ButtonMaker
 		            	//cleanup();
             			if (key!="A")
             			{
-					if (f5.hasPayload[key]  && key!="ESC" && f5.tooltips[key].size() > 0) 
+					if (f5data.hasPayload[key]  && key!="ESC" && f5data.tooltips[key].size() > 0) 
 					{
-						f5gui.title = "${key} copies text to System Clipboard for : "+ f5.tooltips[key];
+						f5gui.setHeading("${key} copies text to System Clipboard for : "+ f5data.tooltips[key]);
 					}
 					else
 					{
-						if (f5.hasPayload[key])
+						if (f5data.hasPayload[key])
 						{	
-							f5gui.title = "${key} copies text to System Clipboard";
-							def sz = f5.payloads[key].size()
-							f5.buttons[key].setToolTipText( "has ${sz} bytes of text" );
+							f5gui.setHeading("${key} copies text to System Clipboard");
+							def sz = f5data.payloads[key].size()
+							f5data.buttons[key].setToolTipText( "has ${sz} bytes of text" );
 						}
 						else
 						{
-							f5gui.title = "F5 Utility";
+							f5gui.setHeading("F5 Utility");
 						} // end of else
 					} // end of else
 				} // end of if 
@@ -138,18 +138,18 @@ public class ButtonMaker
 	            			{
 						String s = (f5gui.ok) ? "horizontally" : "vertically" ;
 						mybutton.setToolTipText( "Stack these buttons " + s );
-						f5gui.title = "F5 -> click this to stack buttons up or across";	            		
+						f5gui.setHeading("F5 -> click this to stack buttons up or across");	            		
 	            			}
 	            			else
 	            			{
-			            		f5gui.title = "F5 Utility";
+			            		f5gui.setHeading("F5 Utility");
 	            			} // end of lelse
 				} // end of else
     			} // end of mouseEntered
 		}); // mybutton.addMouseListener
 		
 		//ImageIcon cutIcon = new ImageIcon(JavaAbstractActionExample.class.getResource("Cut-32.png"));
-		Action myAction = new ToClipboardAction("Cut", null, "Cut stuff onto the clipboard", new Integer(KeyEvent.VK_CUT));
+		Action myAction = new ToClipboardAction(key, null, "${key} tooltip text goes here", new Integer(KeyEvent."VK_${key}"));
 		
 		mybutton.setAction(myAction); 	// when button mouse clicked
 		myAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_ESCAPE);
@@ -186,7 +186,7 @@ public class ButtonMaker
 		b.setBackground(Color.WHITE);
 		//add(b);
 
-		// add logic when 'A' button is actioned
+		// add logic when 'A' button is actioned - this one moves F5 panel from bottom to left to right side of display
 		b.addActionListener(new ActionListener()
 		{
 			// do this when actioned
@@ -260,11 +260,10 @@ public class ButtonMaker
 		{
 			public void mouseEntered(MouseEvent mEvt) 
             		{
-				quitbutton.setToolTipText( f5.tooltips["ESC"] );
-				f5gui.title = f5.tooltips["ESC"];
+				quitbutton.setToolTipText( f5data.tooltips["ESC"] );
+				f5gui.title = f5data.tooltips["ESC"];
     			}
 		});
-
 
 
 		quitbutton.setFont(new Font("Arial", Font.BOLD, 8));
@@ -280,7 +279,15 @@ public class ButtonMaker
 		return quitbutton;    	
 	} // end of makeQuitButton
 
-
+   	/** 
+    	* Produce log messages using .info method
+    	*/
+    	public void say(String msg)
+    	{
+    		println msg;
+	} // end of say
+    
+    
 	// =============================================================================    
     	/**
       	* The primary method to execute this class. Can be used to test and examine logic and performance issues. 
@@ -294,10 +301,10 @@ public class ButtonMaker
 		// setup empty Map
 		Map myPayload = ["F1":true]
 		Map tools = ["F1":"this is tooltip for F1"]
-		F5GUI f5gui = new F5GUI();
-		F5Data f5 = new F5Data();
+		//F5GUI f5gui = new F5GUI();
+		F5Data f5data = new F5Data();
 		
-		def bm = new ButtonMaker(f5gui, f5);
+		def bm = new ButtonMaker(f5data);
 		assert bm != null;
 		 
 		JButton b = bm.makeButton("F1");  

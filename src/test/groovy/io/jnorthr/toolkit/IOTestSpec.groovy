@@ -55,9 +55,10 @@ Conceptually, a feature method consists of four phases:
     
     when:
       IO io = new IO();
+      io.setFunctionKey("F22");
 
     then:
-		  // Asserts are implicit and not need to be stated.
+	// Asserts are implicit and not need to be stated.
     	true == io!=null;
   } // end of test
 
@@ -65,11 +66,11 @@ Conceptually, a feature method consists of four phases:
   // Second Test
   def "2nd Test: Setup IO object with fail"() {
     given:
-  		println "2nd Test: Setup IO object with fail"
+  	println "2nd Test: Setup IO object with fail"
  
     when:
-    	IO io = new IO(true);
-
+    	IO io = new IO();
+	io.setup();
     then:    
   	// Asserts are implicit and not need to be stated.
 	null != io;

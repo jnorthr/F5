@@ -41,10 +41,10 @@ import javax.swing.*;
 public class F5
 {
 	/** a handle to our IO module to do read/write stuff */
-	IO io = new IO();
+	IO io;
 
 	/** a handle to our global variables to do read/write stuff */
-	F5Data f5 = new F5Data();
+	F5Data f5data = new F5Data();
 
 	/** a handle to our GUI module to track global GUI stuff */
 	F5GUI f5gui = new F5GUI();
@@ -73,38 +73,41 @@ public class F5
      * F11.txt holds tip for F11 function key while it may/maynot have the text we copy to 
      * clipboard if/when F11 key is pressed (or clicked).
      *
-     * Note that these simple .txt files are made in the TemplateMaker class in user home directory
-     * plus folder named 'copybooks' plus F1 plus .txt giving /Users/jim/copybooks/F1.txt file name
+     * Note that these simple .txt files are made in the TemplateMaker class that are found in user home directory
+     * plus folder picked in the Chooser dialog plus F1 plus .txt giving /Users/jim/myfolder/F1.txt file name
      *
      * @return map of known tooltips per function key
      */
     public Map getAvailableTooltips()
     {
     	//tooltips = [:]
-    	f5.tooltips["ESC"] = "ESC key ends this app";
+    	f5data.tooltips["ESC"] = "ESC key ends this app";
+	io = new IO(true);
 
 	(1..12).eachWithIndex{ num, ix -> 
 		String ky = "F${ix+1}";
-		//println "... ky=|F${ix+1}|" 
+		println "... getAvailableTooltips for ky=|F${ix+1}|" 
 
 	        /*
 	        * takes only simple key name like F3 or F3.txt to find a filename like /Users/jim/copybooks/F3.txt
 		*/
-	        String tx = io.getPayload(ky); 
+		io.setFunctionKey(ky);
+	        String tx = io.getPayload(); 
 
 		// remember which function key has boilerplate file by setting it to true or false flag set in IO module
-		f5.hasPayload[ky]=io.present;
+		f5data.hasPayload[ky]=io.present;
 
 	        // keep the text content of file just read in internal array
-        	f5.payloads[ky]=tx;
+        	f5data.payloads[ky]=tx;
+		println "... getAvailableTooltips for f5data.payloads=|${tx}|" 
 
         	// load function key io.tooltip value loaded in io.getPayload
-		f5gui.tooltip = io.tooltip;  //io.getToolTip(tx);
+		//f5gui.tooltip =   //io.getToolTip(tx);
 	        
-	    	f5.tooltips[ky] = f5gui.tooltip;		
+	    	f5data.tooltips[ky] = io.getToolTip();		
 	} // end of each
 
-    	return f5.tooltips;
+    	return f5data.tooltips;
     } // end of method
 
 
@@ -117,17 +120,17 @@ public class F5
 	{
 		if (updatekey!=null)
 		{
-			f5gui.tooltip = io.getToolTip(updatekey);
+			f5gui.tooltip = io.getToolTip();
 			if (f5gui.tooltip.trim().size() > 0)
 			{
-			    	f5.tooltips[updatekey] = f5gui.tooltip;
-			    	if (f5.buttons[updatekey])
+			    	f5data.tooltips[updatekey] = f5gui.tooltip;
+			    	if (f5data.buttons[updatekey])
 			    	{
 					say("F5 -> ${updatekey} function key built text for tooltip: ${f5gui.tooltip}"); 
 				}
 
-				f5.buttons[updatekey].setForeground(Color.BLUE);
-				f5.buttons[updatekey].setFont(new Font("Arial", Font.BOLD, 10)); 
+				f5data.buttons[updatekey].setForeground(Color.BLUE);
+				f5data.buttons[updatekey].setFont(new Font("Arial", Font.BOLD, 10)); 
 				updatekey=null;
 			} // end of if
 		}  // end of if
@@ -139,28 +142,32 @@ public class F5
 	*/
 	public F5() 
 	{
-		f5.tooltips = getAvailableTooltips();
-
-		buttonMaker = new ButtonMaker(f5gui, f5)
+		f5data.tooltips = getAvailableTooltips();
+		buttonMaker = new ButtonMaker(f5data)
+println "\n\n... F5() constructor before makeQuitButton()"			 
 		buttonMaker.quitbutton = buttonMaker.makeQuitButton();
+		JButton b;
+		
+		(1..2).eachWithIndex{ num, ix -> 
+			String tx = "F${num}";
+println "\n\n... F5() constructor before makeButton(${tx})"			 
+			b = buttonMaker.makeButton(tx);
+println "... F5() constructor before makeButton(${tx})\n\n"			 
 
-		(1..12).eachWithIndex{ num, ix -> 
-			String tx = "F${num}"; 
-			JButton b = buttonMaker.makeButton(tx);
-			if (f5.hasPayload[tx]) 
+			if (f5data.hasPayload[tx]) 
 			{
-				b.setToolTipText( f5.tooltips[tx] );
+				b.setToolTipText( f5data.tooltips[tx] );
 			}
 			
-			say "... F5 constructor adding button ${num}+${ix}="+f5.tooltips[tx];
+			say "... F5 constructor adding button ${num}+${ix}="+f5data.tooltips[tx];
 			f5gui.add(b);
-			f5.buttons[tx] = b;
+			f5data.buttons[tx] = b;
 			cleanup(tx);
 		} // end of each
 
 
 		// build the Arrow button to move gui to bottom orleftor right edge of hardware screen
-		def b = buttonMaker.makeButtonA();
+		b = buttonMaker.makeButtonA();
 		f5gui.add(b);
 		def q = buttonMaker.quitbutton; 
 		f5gui.add(q);
@@ -184,7 +191,7 @@ public class F5
 			@Override
 			public void run() 
 			{
-				F5 f5 = new F5();
+				F5 f5data = new F5();
 			}
 		}
 		);

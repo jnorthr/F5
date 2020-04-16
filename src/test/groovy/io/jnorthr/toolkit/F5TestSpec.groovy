@@ -51,13 +51,13 @@ Conceptually, a feature method consists of four phases:
   // First Test
   def "1st Test: Setup F5 for copy to system clipboard"() {
     given:
-  	  println "1st Test: Use F5 to save text for system clipboard"
+  	println "1st Test: Use F5 to save text for system clipboard"
     
     when:
-      F5 tm = new F5();
+      F5Data tm = new F5Data();
 
     then:
-		  // Asserts are implicit and not need to be stated.
+	// Asserts are implicit and not need to be stated.
     	true == tm!=null;
   } // end of test
 
@@ -65,26 +65,28 @@ Conceptually, a feature method consists of four phases:
   // Second Test
   def "2nd Test: Confirm F5 to capture text for system clipboard "() {
     given:
-  		println "2nd Test: Use F5 to paste text on system clipboard"
-        F5 tm = new F5();
+  	println "2nd Test: Use F5 to paste text on system clipboard"
+        F5Data tm = new F5Data();
  
     expect:    
-  		// Asserts are implicit and not need to be stated.
-		null != tm;
+  	// Asserts are implicit and not need to be stated.
+	null != tm;
   } // end of test
   
   // Third Test
-  def "3rd Test: Confirm F5 can get available tooltips, if any "() {
+  def "3rd Test: Confirm IO can get available tooltip, if any "() {
     given:
         println "3rd Test: Use F5 to get any available tooltips"
-        F5 tm = new F5();
+        IO tm = new IO();
+        tm.setFunctionKey("F22");
+        tm.setup();
  
     when:
-      def m = tm.getAvailableTooltips();
+      def m = tm.getToolTip();
 
     then:    
       // Asserts are implicit and not need to be stated.
-      m instanceof Map ;
+      m instanceof String ;
   } // end of test
   
 } // end of spec

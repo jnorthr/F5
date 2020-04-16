@@ -58,7 +58,7 @@ public class F5GUI extends JFrame implements KeyListener
 
 
 	/** If we need to println audit log to work, this will be true */ 
-    	boolean audit = true;
+    	boolean audit = false;
 
 	/**
      	* A method to print an audit log if audit flag is true
@@ -70,6 +70,20 @@ public class F5GUI extends JFrame implements KeyListener
     	{
         	if (audit) { println text; }
     	} // end of method
+
+
+	/**
+     	* A method to change the dialog title to this new value
+     	*
+     	* @param  is text to show user in dialog title line
+     	* @return void
+     	*/
+    	public void setHeading(String text)
+    	{
+    		say "... F5GUI.setHeading($text)";
+        	this.setTitle(text); 
+    	} // end of method
+
 
 	public void add(JButton b)
 	{
@@ -139,7 +153,7 @@ public class F5GUI extends JFrame implements KeyListener
 	public F5GUI() throws HeadlessException 
 	{
 		super("F5 Utility");
-		setTitle("F5 Utility");
+		setHeading("F5 Utility");
 		getContentPane().setBackground(Color.BLACK);
 		setLayout(H);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -158,7 +172,7 @@ public class F5GUI extends JFrame implements KeyListener
 		this.setLocation(windowX, windowY);  
 		say "... initial setLocation(${windowX}, ${windowY}) "
 
-		validate();
+		revalidate();
 	} // end of constructor
 
     // =============================================================================    
@@ -173,6 +187,7 @@ public class F5GUI extends JFrame implements KeyListener
 	public static void main(String[] args) 
 	{
 		F5GUI f5d = new F5GUI().setVisible(true);
+		
 		println "--- the end of F5GUI ---"
 	} // end of main
 

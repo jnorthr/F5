@@ -16,6 +16,7 @@ import javax.swing.*;
 public class ToClipboardAction extends AbstractAction
 {
 	String key = "";
+	IO io = new IO(true);
 
   public ToClipboardAction(String name, ImageIcon icon, String shortDescription, Integer mnemonic)
   {
@@ -41,12 +42,12 @@ public void actionPerformed(ActionEvent evt)
 	// ok, get xxx.txt text content, do any replacements using groovy template engine
 
 	/** a handle to our IO module to do read/write stuff */
-	IO io = new IO();
+	io.setup(key);
 
 	/** a handle to our IO module to do read/write stuff */
 	F5GUI f5gui = new F5GUI();
 
-	String tx = io.getPayload(key);
+	String tx = io.getPayload();
 	if (tx.length() > 0)
 	{
 		// find the ${} parms
@@ -72,7 +73,7 @@ public void actionPerformed(ActionEvent evt)
       				{
       				    println "... myAction TemplateMaker running..."
 				    TemplateMaker obj = new TemplateMaker(key); 
-				    f5gui.tooltip = io.getToolTip(key);
+				    f5gui.tooltip = io.getToolTip();
 				    println "... ${key} function key has no text for Clipboard; tooltip=|${f5gui.tooltip}|"
 				    if (f5gui.tooltip.trim().size() > 0)
 				    {
@@ -93,8 +94,6 @@ public void actionPerformed(ActionEvent evt)
 } // end of ActionPerformed
 
 } // end of class
-
-
 
 
 		/**

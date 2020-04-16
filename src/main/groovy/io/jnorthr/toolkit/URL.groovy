@@ -33,7 +33,7 @@ public class URL
 
     /** an O/S specific location for the user's home folder name plus a trailing file separator and 
     name of file holding payload text; */ 
-    String fn = home+"copybooks"+fs+"F15.txt";
+    String fn = home+".F5.txt";
 
     /** If DollarSign {} keys found within the template String, this will be true */ 
     boolean hasMap = false;
