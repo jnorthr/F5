@@ -1,6 +1,5 @@
 package io.jnorthr.toolkit;
 
-
 /**
  * This class retains the instance values for the currently running F5 class
  *
@@ -13,7 +12,7 @@ public class F5Data
 	* 
 	* a key/value map storage for know Function Keys; key is like F12,F2,F14 and value,if any, of it's tooltip text  
 	*/
-    	Map tooltips = [:]
+    Map tooltips = [:]
 
 	/**
 	* a True/False variable storage array for each key. If any text is in the payload for this key, the value is true else false means no text to copy to clipboard
@@ -38,6 +37,57 @@ public class F5Data
 	*/
 	Map buttons = [:]
 
+
+	/**
+	* This variable holds current working directory name and home path name of this user to be used in F5
+	*/
+    PathFinder pf;
+    
+	/** If we need to println audit log to work, this will be true */ 
+    boolean audit = true;    
+        
+    // constructor    
+	public F5Data()
+	{
+        pf = new PathFinder();
+ 
+        println "... F5Data from PathFinder user.home (homePath) ="+pf.getHomePath();
+        println "... F5Data from PathFinder user.dir (pwd)="+pf.getCurrentDirectory();
+	} // end of constructor
+    
+
+	/**
+     * A method to print an audit log if audit flag is true
+     *
+     * @param  is text to show user via println
+     * @return void
+     */
+     public void say(String text)
+     {
+     	if (audit) { println text; }
+     } // end of method
+
+	/**
+     * A method to show internal session variables if audit flag is true
+     *
+     * @return void
+     */
+    public void dump()
+    {
+    	say "\nF5Data internals:"
+		def tx = "";
+
+		hasPayload.eachWithIndex { val, index ->
+    		tx = (val) ? "yes" : "no" ;
+    		say "entry ${index} is ${val.key} = ${tx} hasPayload="+hasPayload[val.key]
+    		say "                tooltip:"+tooltips[val.key];
+    		say "                payloads:"+payloads[val.key];
+		} // end of each
+
+    	say "\nF5Data end"
+    } // end of method
+
+
     // =============================================================================    
     /**
       * The primary method to execute this class. Can be used to test and examine logic and performance issues. 
@@ -47,10 +97,15 @@ public class F5Data
       * @param  args a list of possibly zero entries from the command line; first arg[0] if present, is
       *         taken as a simple file name of a groovy script-structured configuration file;
       */
-	public static void main(String[] args) {
-		F5Data f5d = new F5Data();
+	public static void main(String[] args) 
+	{
 		println "-------------------------"
-		println "buttons:"+f5d.buttons.toString();
+		F5Data f5d = new F5Data();
+		f5d.hasPayload["F1"] = true;
+		f5d.tooltips["F1"] = "Tooltip for F1";
+		f5d.payloads["F1"] = "Hello World";
+		f5d.audit = true;
+		f5d.dump();
 		println "--- the end of F5Data ---"
 	} // end of main
 

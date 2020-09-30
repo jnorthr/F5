@@ -1,6 +1,7 @@
 package io.jnorthr.toolkit;
-import org.apache.log4j.*
-import groovy.util.logging.*  
+
+//import org.apache.log4j.*
+//import groovy.util.logging.*  
 
 /**
 * A class that contains results of most recent user dialog
@@ -8,8 +9,8 @@ import groovy.util.logging.*
 * Use annotation to inject log field into the class.
 *
 * @author  jnorthr
-* @version 1.0
-* @since   2016-08-27
+* @version 1.1
+* @since   2020-08-27
 */
 //@Log4j
 public class Response
@@ -19,13 +20,26 @@ public class Response
      */
     boolean chosen = false;
 
-
     /**
      * Integer indicator of the user's inter-action with the chooser. For example: JFileChooser.APPROVE_OPTION
      */
     int returncode = -1;
 
+    /**
+     * Flag set when user hits cancel button on dialog 
+     */
+    boolean abort = false;
 
+    /**
+     * Flag set when user hits button on dialog to end it - red button topleft 
+     */
+    boolean eof = false;
+
+    /**
+     * Text explanation of the user's inter-action with the GUI or interpretation of the returncode
+     */
+	String answer = "";
+	
     /**
      * Temp work area holding the absolute path to the user's artifact selected with the chooser. 
      * For example: fc.getCurrentDirectory().getAbsolutePath() 
@@ -36,7 +50,7 @@ public class Response
 	 * rememberpath=/Users/jimnorthrop/.path.txt 
 	 * isDir=false
      */
-    def path = null;
+    def path = System.getProperty("user.home");
 
 
     /**
@@ -44,32 +58,24 @@ public class Response
      * but not it's path. Holds a value when Directory_Only choice is in effect of lowest level folder name
      * and parent path is in 'path' variable above.
      */
-    def artifact = null;
+    def artifact = System.getProperty("user.home");
     
     /**
      * Temp work area holding the full and complete absolute path plus file name of the user's artifact 
      * selected with the chooser. 
      */
-    def fullname = null;
+    def fullname = System.getProperty("user.home");
 
 
     /**
-     * Flag set when name of the user's artifact 
-     * selected with the chooser is a folder directory 
+     * Flag set when name of the user's artifact selected with the chooser is a folder directory 
      */
-    boolean isDir = false;
+    boolean isDir = true;
 
     /**
-     * Flag set when name of the user's artifact 
-     * points to an actual file or folder that really does exist 
+     * Flag set when name of the user's artifact points to an actual file or folder that really does exist 
      */
-    boolean found = false;
-
-
-    /**
-     * Flag set when user hits cancel button on dialog 
-     */
-    boolean abort = false;
+    boolean found = true;
 
 
     /**
@@ -77,7 +83,6 @@ public class Response
       */
     public Response()
     {
-	//log.level = Level.INFO
     }
 
     /**
@@ -85,7 +90,7 @@ public class Response
       */
     def say()
     {
-	println this.toString();
+	   println this.toString();
     }
 
     /**
@@ -93,14 +98,17 @@ public class Response
       */
         String toString() {
 """
-chosen=${chosen}
-returncode=${returncode}
-path=${path}
-artifact=${artifact} 
-fullname=${fullname}
-found=${found}
-isDir=${isDir}
-cancelled=${abort}""".toString()
+... chosen    =${chosen}
+... returncode=${returncode}
+... cancelled =${abort}
+... eof       =${eof}
+... answer    =${answer}
+... path      =${path}
+... artifact  =${artifact} 
+... fullname  =${fullname}
+... isDir     =${isDir}
+... found     =${found}
+""".toString()
          } // end of toString()    
          
 

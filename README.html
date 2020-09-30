@@ -2,25 +2,24 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.5">
-<meta name="description" content="GPars is a wonderful.">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="description" content="System clipboards are wonderful.">
 <meta name="author" content="jnorthr">
 <title>F5 README</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <link rel="stylesheet" href="./asciidoctor.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
-<link rel="stylesheet" href="./coderay-asciidoctor.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
 <h1>F5 README</h1>
 <div class="details">
 <span id="author" class="author">jnorthr</span><br>
-<span id="email" class="email"><a href="mailto:james.northrop@orange.fr">james.northrop@orange.fr</a></span><br>
+<span id="email" class="email"><a href="mailto:james.b.northrop@googlemail.com">james.b.northrop@googlemail.com</a></span><br>
 <span id="revnumber">version 1.1,</span>
-<span id="revdate">Updated 25 Apr.2018, ReadMe Notes for F5 CopyTool</span>
+<span id="revdate">Updated 5 Aug.2020, ReadMe Notes for F5 CopyTool</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Document Index</div>
@@ -34,6 +33,37 @@
 <li><a href="#_get_text_from_system_clipboard">Get Text from System Clipboard</a></li>
 </ul>
 </li>
+<li><a href="#_source_code_files"><strong><em>Source Code Files</em></strong></a></li>
+<li><a href="#_actions"><strong>Actions</strong></a>
+<ul class="sectlevel2">
+<li><a href="#_copyaction"><strong>CopyAction</strong></a></li>
+<li><a href="#_cutaction"><strong>CutAction</strong></a></li>
+<li><a href="#_editaction"><strong>EditAction</strong></a></li>
+<li><a href="#_exitaction"><strong>ExitAction</strong></a></li>
+<li><a href="#_pasteaction"><strong>PasteAction</strong></a></li>
+<li><a href="#_printaction"><strong>PrintAction</strong></a></li>
+<li><a href="#_quitaction"><strong>QuitAction</strong></a></li>
+<li><a href="#_toclipboardaction"><strong>ToClipboardAction</strong></a></li>
+</ul>
+</li>
+<li><a href="#_primary_classes"><strong>Primary Classes</strong></a>
+<ul class="sectlevel2">
+<li><a href="#_buttonmaker"><strong>ButtonMaker</strong></a></li>
+<li><a href="#_chooser"><strong>Chooser</strong></a></li>
+<li><a href="#_copier"><strong>Copier</strong></a></li>
+<li><a href="#_f5"><strong>F5</strong></a></li>
+<li><a href="#_f5data"><strong>F5Data</strong></a></li>
+<li><a href="#_f5gui"><strong>F5GUI</strong></a></li>
+<li><a href="#_haskey"><strong>hasKey</strong></a></li>
+<li><a href="#_io"><strong>IO</strong></a></li>
+<li><a href="#_mapper"><strong>Mapper</strong></a></li>
+<li><a href="#_pathfinder"><strong>PathFinder</strong></a></li>
+<li><a href="#_positionlogic"><strong>PositionLogic</strong></a></li>
+<li><a href="#_positionlogictest"><strong>PositionLogicTest</strong></a></li>
+<li><a href="#_response"><strong>Response</strong></a></li>
+<li><a href="#_templatemaker"><strong>TemplateMaker</strong></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -43,18 +73,17 @@
 <div class="sectionbody">
 <div class="paragraph">
 <p><strong>Travis C/I</strong> Project Health -
-<span class="image"><a class="image" href="https://travis-ci.org/jnorthr/F5"><img src="https://img.shields.io/travis/jnorthr/F5.svg" alt="Build Status (Travis CI)"></a></span>  <span class="image"><a class="image" href="https://github.com/jnorthr/DoctorPepper/blob/master/LICENSE"><img src="https://img.shields.io/hexpm/l/plug.svg" alt="Apache License"></a></span></p>
+<span class="image"><a class="image" href="https://travis-ci.org/jnorthr/F5"><img src="https://img.shields.io/travis/jnorthr/F5.svg" alt="Build Status (Travis CI)"></a></span>  <span class="image"><a class="image" href="https://github.com/jnorthr/F5/blob/master/LICENSE"><img src="https://img.shields.io/hexpm/l/plug.svg" alt="Apache License"></a></span></p>
 </div>
-<hr>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_purpose"><a class="anchor" href="#_purpose"></a><a class="link" href="#_purpose">Purpose</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>A Gradle project for Groovy users who need utility code to copy text strings to system clipboards. Clone includes gradle build tool wrapper and folder structure like maven/gradle so you don&#8217;t need an installed gradle build tool.</p>
+<p>A Gradle project for users who need a utility tool to copy text strings to system clipboards. Clone includes gradle build tool wrapper and folder structure like maven/gradle so you don&#8217;t need an installed gradle build tool.</p>
 </div>
-<div class="imageblock" style="text-align: center">
+<div class="imageblock text-center">
 <div class="content">
 <img src="./images/divider3.png" alt="divider3">
 </div>
@@ -98,9 +127,9 @@ If you don&#8217;t have a <strong>git</strong> client <a href="https://git-scm.c
 </table>
 </div>
 <hr>
-<div class="imageblock" style="text-align: center">
+<div class="imageblock text-center">
 <div class="content">
-<img src="./images/F7.png" alt="F7">
+<img src="./images/Layout.png" alt="Layout">
 </div>
 </div>
 <hr>
@@ -157,7 +186,7 @@ If you don&#8217;t have a <strong>git</strong> client <a href="https://git-scm.c
 <h2 id="_usage_notes"><a class="anchor" href="#_usage_notes"></a><a class="link" href="#_usage_notes">Usage Notes</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The <strong>Copier.groovy</strong> source has methods to interact with the System Clipboard of most O/S types.</p>
+<p>The <strong>Copier.groovy</strong> source has methods to interact with the System Clipboard for most O/S types.</p>
 </div>
 <div class="sect2">
 <h3 id="_put_text_on_system_clipboard"><a class="anchor" href="#_put_text_on_system_clipboard"></a><a class="link" href="#_put_text_on_system_clipboard">Put text on System Clipboard</a></h3>
@@ -199,11 +228,254 @@ def what = ck.paste();</pre>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_source_code_files"><a class="anchor" href="#_source_code_files"></a><a class="link" href="#_source_code_files"><strong><em>Source Code Files</em></strong></a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Here is a general explanation of each source code file/groovy class used to make F5 work.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_actions"><a class="anchor" href="#_actions"></a><a class="link" href="#_actions"><strong>Actions</strong></a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>These classes provide keyboard actions when attached to known keys.</p>
+</div>
+<div class="sect2">
+<h3 id="_copyaction"><a class="anchor" href="#_copyaction"></a><a class="link" href="#_copyaction"><strong>CopyAction</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Feature to create a Copy Action skeleton for mouseAdapter and KeyboardAdapter actions</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cutaction"><a class="anchor" href="#_cutaction"></a><a class="link" href="#_cutaction"><strong>CutAction</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Feature to create a system clipboard Cut Action skeleton for mouseAdapter and KeyboardAdapter actions</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_editaction"><a class="anchor" href="#_editaction"></a><a class="link" href="#_editaction"><strong>EditAction</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Here we show dialog to allow user to revise text for a function key, then stored in file named after function key plus .txt suffix. So function key four would store text in file named F4.txt</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_exitaction"><a class="anchor" href="#_exitaction"></a><a class="link" href="#_exitaction"><strong>ExitAction</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Feature to create a skeleton action to exit an app for mouseAdapter and KeyboardAdapter actions</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pasteaction"><a class="anchor" href="#_pasteaction"></a><a class="link" href="#_pasteaction"><strong>PasteAction</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Feature to create a skeleton action to paste text to system clipboard using mouseAdapter and KeyboardAdapter actions</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_printaction"><a class="anchor" href="#_printaction"></a><a class="link" href="#_printaction"><strong>PrintAction</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Feature to copy the current view of your screen to a system clipboard using mouseAdapter and KeyboardAdapter actions</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_quitaction"><a class="anchor" href="#_quitaction"></a><a class="link" href="#_quitaction"><strong>QuitAction</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Feature to create an Action to dispose of the current JOptionPane dialog</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_toclipboardaction"><a class="anchor" href="#_toclipboardaction"></a><a class="link" href="#_toclipboardaction"><strong>ToClipboardAction</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Here's logic to copy payload text to clipboard for one function key that's been presssed</pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_primary_classes"><a class="anchor" href="#_primary_classes"></a><a class="link" href="#_primary_classes"><strong>Primary Classes</strong></a></h2>
+<div class="sectionbody">
+<div class="literalblock">
+<div class="content">
+<pre>These source files hold a number of java/groovy classes to do the deed.</pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_buttonmaker"><a class="anchor" href="#_buttonmaker"></a><a class="link" href="#_buttonmaker"><strong>ButtonMaker</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Utility method to build a single JButton for each function key to paste text to the System clipboard  containing logic to read text from external file due to being mouse clicked or pressing it's associate Function Key.</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Also support methods to make Quit, screen print and panel move buttons for the F5 dialog.</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_chooser"><a class="anchor" href="#_chooser"></a><a class="link" href="#_chooser"><strong>Chooser</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Groovy code to choose one folder using java's JFileChooser then write user's choice into &lt;user&gt;\.F5.txt file.</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Will only allow choice of a single directory by setting another JFileChooser feature</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_copier"><a class="anchor" href="#_copier"></a><a class="link" href="#_copier"><strong>Copier</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Default constructor builds a tool to interact with the System Clipboard for most operatng systems.</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_f5"><a class="anchor" href="#_f5"></a><a class="link" href="#_f5"><strong>F5</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Wrapper code to build and run the F5 copy tool.</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_f5data"><a class="anchor" href="#_f5data"></a><a class="link" href="#_f5data"><strong>F5Data</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>This class retains the session instance values for the currently running F5 class</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_f5gui"><a class="anchor" href="#_f5gui"></a><a class="link" href="#_f5gui"><strong>F5GUI</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>JFrame GUI to build a tool to support function key usage to paste text onto the System clipboard</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_haskey"><a class="anchor" href="#_haskey"></a><a class="link" href="#_haskey"><strong>hasKey</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>single method to confirm string is a valid function key choice between F1 and F24</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_io"><a class="anchor" href="#_io"></a><a class="link" href="#_io"><strong>IO</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Tool to read/write/update/delete/confirm there is text from a File for each function key, where file name starts with a capital letter 'F' - for function key plus a number between one and twenty-four. This is followed by a file
+suffix '.txt'.</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>So, for example, 'F1.txt' has this format and content: The optional, tooltip is located at the start of text within a pair of ||'s  so: |Asciidoctor Template|Text payload for the F1 function key ${abbrev} ${name}.</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>After loading, the 'payload' variable holds :
+Text payload for the F1 function key ${abbrev} ${name}
+and 'tooltip' variable has : Asciidoctor Template</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Note, in this example are optional replacement variables denoted by ${} and when, in this example, the F1 function key is pressed, the user is asked, via a dialog, to provide a replacement value for that name. Here, the user is asked for a value to be used instead of 'abbrev' plus a second time to provide a new value for 'name'.</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>If the user answers 'Cool' for the 'abbrev' and 'Fred' for 'name', then the system clipboard will be filled with :
+*Text payload for the F1 function key Cool Fred.*</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>and the title of the dialog will be 'Asciidoctor Template'.</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_mapper"><a class="anchor" href="#_mapper"></a><a class="link" href="#_mapper"><strong>Mapper</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Feature to find template replacement names within a template string</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pathfinder"><a class="anchor" href="#_pathfinder"></a><a class="link" href="#_pathfinder"><strong>PathFinder</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>This program implements a support application that gains system &amp; user values for directory and folder names, confirms the exists of an optional text file, and if that exists and has a text value that is also a valid system directory foler name, then copyPathFound boolean becomes true.</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_positionlogic"><a class="anchor" href="#_positionlogic"></a><a class="link" href="#_positionlogic"><strong>PositionLogic</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>This Swing class demonstrates JFrame positional features. It allows JFrame provided controlling logic to move the frame to each corner of the physical screen display using mouse on button or keyboard backslash '\' key.</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_positionlogictest"><a class="anchor" href="#_positionlogictest"></a><a class="link" href="#_positionlogictest"><strong>PositionLogicTest</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>A sample test harness to build prototypes of GUI components and test how they would look when being moved around.</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_response"><a class="anchor" href="#_response"></a><a class="link" href="#_response"><strong>Response</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>A class that holds session instance results of most recent user dialog</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_templatemaker"><a class="anchor" href="#_templatemaker"></a><a class="link" href="#_templatemaker"><strong>TemplateMaker</strong></a></h3>
+<div class="literalblock">
+<div class="content">
+<pre>Feature class to get text &amp; tooltip for valid function keys and save it with known .txt filename in the PathFinder discovered local file path or folder directory.</pre>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 1.1<br>
-Last updated 2018-04-15 18:41:23 Romance Daylight Time
+Last updated 2020-09-21 20:33:28 +0100
 </div>
 </div>
 </body>

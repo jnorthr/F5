@@ -7,12 +7,6 @@ import javax.swing.*
  */
 public class Mapper
 {
-    /** an O/S specific char. as a file path divider */
-    String fs = java.io.File.separator;
-
-    /** an O/S specific location for the user's home folder name */ 
-    String home = System.getProperty("user.home");     
-
     /** If null keys found within the template String, this will be true */ 
     boolean hasMap = false;
 
@@ -50,7 +44,6 @@ public class Mapper
         if (audit) { println text; }
     } // end of method
     
-
 
     /**
      * A method to ask user for a value for one replacement variable
@@ -223,6 +216,7 @@ public class ${classname}
 
 } // end of class
 '''.toString();
+
         map = ma.getMap(s);
 
         println "----------------\neach:";

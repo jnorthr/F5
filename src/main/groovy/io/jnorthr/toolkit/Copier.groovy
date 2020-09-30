@@ -1,8 +1,6 @@
 package io.jnorthr.toolkit;
 
 import groovy.transform.*;
-
-// https://www.developer.com/java/data/how-to-code-java-clipboard-functionality.html
 import java.awt.Toolkit;
 import java.awt.datatransfer.ClipboardOwner
 import java.awt.datatransfer.Clipboard;
@@ -18,13 +16,7 @@ import java.io.IOException;
  * Feature to copy text to system clipboard
  */
 public class Copier
-{
-    /** an O/S specific char. as a file path divider */
-    String fs = java.io.File.separator;
-
-    /** an O/S specific location for the user's home folder name */ 
-    String home = System.getProperty("user.home");
-    
+{    
     /** If we need to println audit log to work, this will be true */ 
     boolean audit = false;
 
@@ -48,7 +40,7 @@ public class Copier
     } // end of method
 
     /**
-     * Method to place provided String of text on the System Clipboard for most operatng systems
+     * Method to place provided String of text on the System Clipboard for most operating systems
      *
      * @param  text string to copy onto system clipboard
      * @return void

@@ -28,18 +28,16 @@ public class EditAction extends AbstractAction
 	    super(name, icon);
 	    putValue(SHORT_DESCRIPTION, shortDescription);
 	    putValue(MNEMONIC_KEY, mnemonic);
-	    //putValue(KEY, name);
-            key = name;
+        key = name;
 	} // end of method
 
 	public void actionPerformed(ActionEvent evt) 
 	{
 		print("\nAction run when CTRL+VK_${key} function key WAS pressed ...");
-		//cleanup();
 
-        	String tx = io.getPayload(key);
-        	if (tx.length() > 0)
-        	{
+        String tx = io.getPayload(key);
+       	if (tx.length() > 0)
+       	{
 			title = "F5 -> ${key} function key has ${tx.length()} bytes for ${tooltips[key]}"; 
 			SwingUtilities.invokeLater(new Runnable() 
 			{
@@ -57,24 +55,25 @@ public class EditAction extends AbstractAction
 					}  // end of if
 				} // end of run
 			}); // end of invoke					
-       		} // end of if
-       		else
-       		{
-        			if (key!="A")
-        			{
-					title = "F5 -> ${key} function key requires text to ";  
-					SwingUtilities.invokeLater(new Runnable() 
-    					{
-      						public void run()
-      						{
-      							// write new payload for this key
-	      						println "... Action TemplateMaker key!=A"
-							TemplateMaker obj = new TemplateMaker(key, true); 
-							updatekey = key;                   
-							title = "F5 -> ${key} - you need to  text";  
-      						} // end of run
-	    				}); // end of invoke
-    				} // end of if					
+       	} // end of if
+      	else
+       	{
+        	if (key!="A")
+        	{
+				title = "F5 -> ${key} function key requires text to ";  
+				SwingUtilities.invokeLater(new Runnable() 
+    			{
+      				public void run()
+      				{
+      					// write new payload for this key
+	      				println "... Action TemplateMaker key!=A"
+						TemplateMaker obj = new TemplateMaker(key, true); 
+						updatekey = key;                   
+						title = "F5 -> ${key} - you need to  text";  
+      				} // end of run
+	 			}); // end of invoke
+    		} // end of if
+    							
 		} // end of else
 	} // end of ActionPerformed
 

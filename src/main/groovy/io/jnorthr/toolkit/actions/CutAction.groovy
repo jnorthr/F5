@@ -22,23 +22,3 @@ public class CutAction extends AbstractAction
   }
 }
 
-/*
-https://alvinalexander.com/java/java-action-abstractaction-actionlistener
-
-ImageIcon cutIcon = new ImageIcon(JavaAbstractActionExample.class.getResource("Cut-32.png"));
-Action cutAction = new CutAction("Cut", cutIcon, "Cut stuff onto the clipboard", new Integer(KeyEvent.VK_CUT));
-
-// create the java menu item, giving it our action
-JMenuItem cutMenuItem = new JMenuItem(cutAction);
-
-<or>
-
-// create the java toolbar
-JToolBar toolBar = new JToolBar();
-
-// create a java button (JButton), giving it our Action
-JButton cutButton = new JButton(cutAction);
-
-// add the button to the toolbar
-toolBar.add(cutButton);
-*/

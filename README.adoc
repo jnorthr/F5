@@ -1,6 +1,6 @@
 = F5 README
-jnorthr <james.northrop@orange.fr>
-V1.1, Updated 25 Apr.2018, ReadMe Notes for F5 CopyTool
+jnorthr <james.b.northrop@googlemail.com>
+V1.1, Updated 5 Aug.2020, ReadMe Notes for F5 CopyTool
 :sectanchors:
 :sectlinks:
 :icons: font
@@ -12,21 +12,20 @@ V1.1, Updated 25 Apr.2018, ReadMe Notes for F5 CopyTool
 :toc-title: Document Index
 :icons: font
 :source-highlighter: coderay
-:docslink: http://gpars.org/[GPars Documentation]
-:description: GPars is a wonderful.
+:docslink: https://github.com/jnorthr/F5[F5 Github Repo]
+:description: System clipboards are wonderful.
 
-// include::_includes/navbar2.txt[]
+//include::_includes/navbar2.txt[]
 
 == Status
 
 *Travis C/I* Project Health -
-image:https://img.shields.io/travis/jnorthr/F5.svg[Build Status (Travis CI), link=https://travis-ci.org/jnorthr/F5]  image:https://img.shields.io/hexpm/l/plug.svg[Apache License, link=https://github.com/jnorthr/DoctorPepper/blob/master/LICENSE]
+image:https://img.shields.io/travis/jnorthr/F5.svg[Build Status (Travis CI), link=https://travis-ci.org/jnorthr/F5]  image:https://img.shields.io/hexpm/l/plug.svg[Apache License, link=https://github.com/jnorthr/F5/blob/master/LICENSE]
 
-''''
 
 == Purpose
 
-A Gradle project for Groovy users who need utility code to copy text strings to system clipboards. Clone includes gradle build tool wrapper and folder structure like maven/gradle so you don't need an installed gradle build tool.
+A Gradle project for users who need a utility tool to copy text strings to system clipboards. Clone includes gradle build tool wrapper and folder structure like maven/gradle so you don't need an installed gradle build tool.
  
 image::divider3.png[align=center, title-align=center]
 
@@ -56,7 +55,7 @@ NOTE: If you don't have a *git* client https://git-scm.com/downloads[click here 
 
 ''''
 
-image::F7.png[align=center, title-align=center]
+image::Layout.png[align=center, title-align=center]
 
 ''''
 
@@ -83,7 +82,7 @@ The code we write today and tomorrow will probably never run on a single process
 
 == Usage Notes
 
-The *Copier.groovy* source has methods to interact with the System Clipboard of most O/S types.
+The *Copier.groovy* source has methods to interact with the System Clipboard for most O/S types.
 
 === Put text on System Clipboard 
 
@@ -116,5 +115,130 @@ Copier ck = new Copier();
 def what = ck.paste();
 ----
 
+== *_Source Code Files_*
+
+Here is a general explanation of each source code file/groovy class used to make F5 work.
+
+== *Actions*
+
+These classes provide keyboard actions when attached to known keys.
+
+=== *CopyAction*
+
+	Feature to create a Copy Action skeleton for mouseAdapter and KeyboardAdapter actions
+
+=== *CutAction*
+
+	Feature to create a system clipboard Cut Action skeleton for mouseAdapter and KeyboardAdapter actions
+
+=== *EditAction*
+
+	Here we show dialog to allow user to revise text for a function key, then stored in file named after function key plus .txt suffix. So function key four would store text in file named F4.txt
+
+=== *ExitAction*
+
+	Feature to create a skeleton action to exit an app for mouseAdapter and KeyboardAdapter actions
+
+=== *PasteAction*
+
+	Feature to create a skeleton action to paste text to system clipboard using mouseAdapter and KeyboardAdapter actions
+
+=== *PrintAction*
+
+	Feature to copy the current view of your screen to a system clipboard using mouseAdapter and KeyboardAdapter actions
+
+=== *QuitAction*
+
+	Feature to create an Action to dispose of the current JOptionPane dialog
+
+=== *ToClipboardAction*
+
+	Here's logic to copy payload text to clipboard for one function key that's been presssed
+
+'''
+
+== *Primary Classes*
+
+	These source files hold a number of java/groovy classes to do the deed.
+	
+=== *ButtonMaker*
+
+	Utility method to build a single JButton for each function key to paste text to the System clipboard  containing logic to read text from external file due to being mouse clicked or pressing it's associate Function Key.
+
+	Also support methods to make Quit, screen print and panel move buttons for the F5 dialog.
+
+	Called from F5 wrapper
+	
+=== *Chooser* 
+
+	Groovy code to choose one folder using java's JFileChooser then write user's choice into <user>\.F5.txt file.
+
+	Will only allow choice of a single directory by setting another JFileChooser feature
+
+=== *Copier*
+
+	Default constructor builds a tool to interact with the System Clipboard for most operatng systems.
+
+=== *F5*
+
+	Wrapper code to build and run the F5 copy tool.
+	
+=== *F5Data*
+
+	This class retains the session instance values for the currently running F5 class
+
+=== *F5GUI*
+
+	JFrame GUI to build a tool to support function key usage to paste text onto the System clipboard
+
+=== *hasKey*
+
+	single method to confirm string is a valid function key choice between F1 and F24
+
+=== *IO*
+	
+	Tool to read/write/update/delete/confirm there is text from a File for each function key, where file name starts with a capital letter 'F' - for function key plus a number between one and twenty-four. This is followed by a file
+ suffix '.txt'.
+
+	So, for example, 'F1.txt' has this format and content: The optional, tooltip is located at the start of text within a pair of ||'s  so: |Asciidoctor Template|Text payload for the F1 function key ${abbrev} ${name}.
+
+	After loading, the 'payload' variable holds : 
+	Text payload for the F1 function key ${abbrev} ${name} 
+	and 'tooltip' variable has : Asciidoctor Template
+	
+	Note, in this example are optional replacement variables denoted by ${} and when, in this example, the F1 function key is pressed, the user is asked, via a dialog, to provide a replacement value for that name. Here, the user is asked for a value to be used instead of 'abbrev' plus a second time to provide a new value for 'name'.
+       
+	If the user answers 'Cool' for the 'abbrev' and 'Fred' for 'name', then the system clipboard will be filled with :
+	*Text payload for the F1 function key Cool Fred.*
+	
+	and the title of the dialog will be 'Asciidoctor Template'.
+	
+=== *Mapper*
+
+	Feature to find template replacement names within a template string
+
+=== *PathFinder*
+
+	This program implements a support application that gains system & user values for directory and folder names, confirms the exists of an optional text file, and if that exists and has a text value that is also a valid system directory foler name, then copyPathFound boolean becomes true.
+
+=== *PositionLogic*
+
+	This Swing class demonstrates JFrame positional features. It allows JFrame provided controlling logic to move the frame to each corner of the physical screen display using mouse on button or keyboard backslash '\' key.
+
+=== *PositionLogicTest*
+
+	A sample test harness to build prototypes of GUI components and test how they would look when being moved around.
+
+=== *Response*
+
+	A class that holds session instance results of most recent user dialog
+
+=== *TemplateMaker*
+
+	Feature class to get text & tooltip for valid function keys and save it with known .txt filename in the PathFinder discovered local file path or folder directory.
+
+	Called from two actions: ToClipboardAction & EditAction. Tested in two test scripts: F5TestSpec & TemplateMakerTestSpec
+
+''''
 
 

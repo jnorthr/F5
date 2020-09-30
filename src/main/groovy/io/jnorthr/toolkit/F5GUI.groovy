@@ -18,162 +18,146 @@ import javax.swing.*;
  *
  * https://docs.oracle.com/javase/tutorial/uiswing/components/menu.html for more on keystrokes
  *
- * @author james.northrop@orange.fr
+ * @author james.b.northrop@googlemail.com
  *
  */
-public class F5GUI extends JFrame implements KeyListener
+public class F5GUI extends JFrame 
 {
-
 	/** string holding the title to be displayed as part of GUI panel top line
 	*/
 	String title = "";
 
-	/** a yes/no flag is true to build gui vertically or nofor horizontal layout;
-	* toggles each time the Arrow button on F5gui is hit
-	*/
-	boolean ok = false;
-
 	/** a handle to temp storage for an in-progress Function Key  */
 	String tooltip = "";
-
-	KeyStroke leftstroke = KeyStroke.getKeyStroke("VK_LEFT")
     
 	/** a handle to temp storage for just changed Function Key  */
 	String updatekey = null;
 
-	/** a yes/no choice to put our gui at a left pixel location edge if true else right edge if false  */
-	boolean right = false;
-
-	/** a single row grid layout manager  */
-	LayoutManager H = new GridLayout(1, 0, 0, 0);
-    
-	/** a single column grid layout manager  */
-	LayoutManager V = new GridLayout(0, 1, 0, 0);
-    
-	/** a dimension of the current hardware screen size */
-	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
-	/** a dimension of the current F5 screen size */
-    	Dimension windowSize = null;
-
-
 	/** If we need to println audit log to work, this will be true */ 
-    	boolean audit = false;
+    boolean audit = true;
+
+	/** a handle to our IO module to do read/write stuff */
+	IO io = new IO();
+
+	/** a handle to our global variables to do read/write stuff */
+	F5Data f5data;
+
+	/** a handle to our logic to manage the on-screen location of our F5 dialog */
+	PositionLogic pl;
 
 	/**
-     	* A method to print an audit log if audit flag is true
-     	*
-     	* @param  is text to show user via println
-     	* @return void
-     	*/
-    	public void say(String text)
-    	{
-        	if (audit) { println text; }
-    	} // end of method
-
+     * A method to print an audit log if audit flag is true
+     *
+     * @param  is text to show user via println
+     * @return void
+     */
+     public void say(String text)
+     {
+     	if (audit) { println text; }
+     } // end of method
 
 	/**
-     	* A method to change the dialog title to this new value
-     	*
-     	* @param  is text to show user in dialog title line
-     	* @return void
-     	*/
-    	public void setHeading(String text)
-    	{
-    		say "... F5GUI.setHeading($text)";
-        	this.setTitle(text); 
-    	} // end of method
+     * A method to change the dialog title to this new value
+     *
+     * @param  is text to show user in dialog title line
+     * @return void
+     */
+    public void setHeading(String text)
+    {
+    	say "... F5GUI.setHeading($text)";
+        this.setTitle(text); 
+    } // end of method
 
 
+	// includes a button onto this JFrame's content pane
 	public void add(JButton b)
 	{
 		super.add(b);
 		say "... F5GUI.add"+b.toString();
 	} // end of add
 
+    /**
+     * A method to get known tooltip text from external file named after a function key; so
+     * tooltip text for help in F2.txt is for the F2 function key and also holds payload; or
+     * F11.txt holds tip for F11 function key while it may/maynot have the text we copy to
+     * clipboard if/when F11 key is pressed (or clicked).
+     *
+     * Note that these simple .txt files are made in the TemplateMaker class that are found in user home directory
+     * plus folder picked in the Chooser dialog plus F1 plus .txt giving /Users/jim/myfolder/F1.txt file name
+     *
+     * @return map of known tooltips per function key
+     */
+    public Map getAvailableTooltips()
+    {
+    	say "... getAvailableTooltips() starting --"
+    	f5data.tooltips["ESC"] = "ESC key ends this app";
+    	f5data.tooltips["PRINTSCREEN"] = "This key makes full screen copy in screenprint.png";
+
+		(1..12).eachWithIndex{ num, ix ->
+			String ky = "F${ix+1}";
+			say "... getAvailableTooltips for ky=|F${ix+1}|"
+
+	        /*
+	        * takes only simple key name like F3 or F3.txt to find a filename like /Users/jim/copybooks/F3.txt
+			*/
+			io.setFunctionKey(ky);
+	        String tx = io.getPayload(ky);
+
+			// remember which function key has boilerplate file by setting it to true or false flag set in IO module
+			f5data.hasPayload[ky] = io.pf.hasFunctionKeyFileName(ky);  //io.present;
+
+	        // keep the text content of file just read in internal array
+        	f5data.payloads[ky]=tx;
+
+	    	f5data.tooltips[ky] = io.getToolTip(ky);
+		} // end of eachWithIndex
+
+		f5data.dump();
+
+    	return f5data.tooltips;
+    } // end of method
+
 
 	/**
-	 * KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, KeyEvent.CTRL_MASK);
-	 * KeyStroke.getKeyStroke("RIGHT"); DOWN LEFT
-	 * setLayout(new BoxLayout(BoxLayout.X_AXIS));  //this, BoxLayout.X_AXIS));
-	 * setLayout(new FlowLayout(FlowLayout.CENTER));
-	 * BoxLayout bl = new BoxLayout(getContentPane(), BoxLayout.X_AXIS);
-	 * def bl = new GridLayout(1, 0, 0, 0);
-	*/
-
-	public void keyTyped(KeyEvent event) 
+     * Utility method to reset a single JButton after it's title and/or payload were updated.
+     *
+     * @return void - no response
+     */
+	public void cleanup(String updatekey)
 	{
-		println "... keyTyped:"+event.getKeyCode();
+		if (updatekey!=null)
+		{
+			tooltip = io.getToolTip(updatekey);
+			if (tooltip.trim().size() > 0)
+			{
+			    f5data.tooltips[updatekey] = tooltip;
+			    if (f5data.buttons[updatekey])
+			    {
+					say("F5 -> ${updatekey} function key built text for tooltip: ${tooltip}");
+				} // end of if
 
-		if (event.getKeyCode()== KeyEvent.VK_LEFT) { println "... just pressed KeyEvent.VK_LEFT"; }
-		if (event.getKeyCode()== KeyEvent.VK_KP_LEFT) { println "... just pressed KeyEvent.VK_KP_LEFT"; }
-		if (event.getKeyCode()== KeyEvent.VK_RIGHT) { println "... just pressed KeyEvent.VK_RIGHT"; }
-		if (event.getKeyCode()== KeyEvent.VK_KP_RIGHT) { println "... just pressed KeyEvent.VK_KP_RIGHT"; }
-	}
-
-	public void keyReleased(KeyEvent kr) 
-	{
-	    println "... keyReleased(KeyEvent kr):"+kr.toString();
-	}
-
-	public void keyPressed(KeyEvent e) 
-	{
-	    	int keyCode = e.getKeyCode();
-		println "... keyPressed:"+keyCode();
-
-		say "... keyPressed(KeyEvent e) = "+keyCode;
-		switch( keyCode ) 
-		{ 
-			case KeyEvent.VK_UP:
-            					// handle up 
-            					println "... KeyPressed ? VK_UP";
-            					break;
-        		case KeyEvent.VK_DOWN:
-            					// handle down 
-            					break;
-		        case KeyEvent.VK_LEFT:
-            					// handle left
-            					println "... KeyPressed ? VK_LEFT";
-            					break;
-		        case KeyEvent.VK_KP_LEFT:
-            					// handle left
-            					println "... KeyPressed ? VK_KP_LEFT";
-            					break;
-        		case KeyEvent.VK_RIGHT :
-            					// handle right
-            					break;
-     		} // end of switch
-	} // end of keyPressed
-
+				updatekey=null;
+			} // end of if
+		}  // end of if
+	} // end of cleanup
 
 
 	/**
 	* Default constructor to build a tool to support function key usage to paste text onto the System clipboard
 	*/
-	public F5GUI() throws HeadlessException 
+	public F5GUI(F5Data f5d) throws HeadlessException 
 	{
 		super("F5 Utility");
+		f5data = f5d;
 		setHeading("F5 Utility");
 		getContentPane().setBackground(Color.BLACK);
-		setLayout(H);
+		setSize(400,300);
+		pl = new PositionLogic(this);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(760, 80);
-		setPreferredSize(new Dimension(760, 80));
-
-		windowSize = this.getSize();
-
-		int windowX = Math.max(0, (screenSize.width  - windowSize.width ) / 2);
-		int windowY = Math.max(0, (screenSize.height - windowSize.height)) - 80;
-		//windowY = screenSize.height - (windowSize.height+40);
-
-		say "... windowSize.width=${windowSize.width} and windowSize.height=${windowSize.height}"
-		say "... screenSize.width=${screenSize.width} and screenSize.height=${screenSize.height}"
 		
-		this.setLocation(windowX, windowY);  
-		say "... initial setLocation(${windowX}, ${windowY}) "
-
 		revalidate();
 	} // end of constructor
+
 
     // =============================================================================    
     /**
@@ -186,8 +170,15 @@ public class F5GUI extends JFrame implements KeyListener
     */
 	public static void main(String[] args) 
 	{
-		F5GUI f5d = new F5GUI().setVisible(true);
+		F5Data f5data = new F5Data();
+		F5GUI f5d = new F5GUI(f5data);
+		f5d.setVisible(true);
+		f5d.getAvailableTooltips();
+		//f5d.f5data.dump();
 		
+		println "... ------------";
+		//f5data.dump();
+
 		println "--- the end of F5GUI ---"
 	} // end of main
 

@@ -1,56 +1,57 @@
 package io.jnorthr.toolkit;
 
 /*
- * Feature to read/write/update text from a File
+ * Tool to read/write/update/delete/confirm thete is text from a File for function keys
+ *
+ * F1.txt has this content: The tooltip is located within a pair of ||'s
+ * |Asciidoctor Template|Text payload for
+ * the F1 function key ${abbrev}.${name}.
+ *
+ * so after loading, the 'payload' variable holds : 
+ * Text payload for
+ * the F1 function key ${abbrev}.${name}.
+ * 
+ * and 'tooltip' has :
+ * Asciidoctor Template
+ *
  */
 public class IO
 {
-    /** an O/S specific char. as a file path divider */
-    String fs = java.io.File.separator;
+    /** If we need to print audit log to work, this will be true */ 
+    private boolean audit = true;
 
-    /** an O/S specific location for the user's home folder name plus a trailing file separator*/ 
-    String home = System.getProperty("user.home")+fs;
+    /** a class of most recent system and app metadata values for this F5 app */ 
+    PathFinder pf = new PathFinder();
 
-    /** a folder-relative location for the user's home folder name */ 
-    String folder = "copybooks"+fs;
+    /** a string for most recently loaded function key this instance of this class is using,
+     * uppercase and trimmed of leading & trailing blanks, line feeds, etc. say like F4 
+     */ 
+    private String functionkey = "";
 
-
-    /**
-    * a folder-relative location for the user's filename storage location currently being revised/written
-    * like /Users/jim/copybooks/F1.txt,etc.
-    */ 
-    String fn = home + folder;
-
-    /** a structure of most recent answers from Chooser folder picking dialog */ 
-    Response re = new Response(); 
-
-
-    /** a string of most recent identified function key this instance of this class is using */ 
-    private String functionkey = null;
-
-    /** a string of most recent file contents from external file */ 
+    /** a string of most recent file non-tooltip contents from external file for this functionkey */ 
     private String payload = "";
 
-    /** a string of most recent file contents between || */ 
+    /** a string of most recent file contents between ||  for this functionkey */ 
     private String tooltip = "";
 
-    /**
-    * present is true if 'fn' file exists meaning there must be a payload and/or tooltip
-    */
-    private boolean present = false;
 
-    /** If we need to println audit log to work, this will be true */ 
-    private boolean audit = false;
+    /** an O/S specific location for the user's home folder name plus a trailing file separator
+     * plus the 'copybook' group folder name - something like /Users/jim/copybooks which holds a
+     * bunch of payload files, one per function key and named 'function key name' + .txt 
+     *
+     * For example function key twelve payload is expected to be '/Users/jim/copybooks/F12.txt'
+     */ 
+    String  copybookFilename = "";
 
-    /** a string of most recent file name composed of home directory + F5 folder name + functionkey + .txt 
-    * like /Users/jim/copybooks/F11.txt
-    */ 
-    private String filename = home + folder;
+    /** a flag that tells us if there exists a physical file as named in copybookFilename */ 
+    boolean copybookFound = false;
 
 
-        
-    /** valid functionkey choices for this program; F0 is for the ESCape key */
-    def keys = ["F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","F13","F14","F15","F16","F17","F18","F19","F20","F21","F22","F23","F24","F0"] 
+    /** valid functionkey choices for this program; 
+     * both ESC & F0 are for the ESCape key while 'A' choice is to move panel side-to-bottom-to-side of display
+     */
+    def keys = ["A","F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","F13","F14","F15","F16","F17","F18","F19","F20","F21","F22","F23","F24","F0","ESC"] 
+
 
     // --------------------------------------------------
     // Class Constructor Methods
@@ -61,25 +62,6 @@ public class IO
      */
     public IO()
     {
-        Chooser ch = new Chooser("Pick input Folder");
-        say "... Pick a folder-only "
-        
-        re = ch.getChoice();
-
-	say "... Response="+re.toString();
-        if (re.chosen && !re.abort)
-        {
-            say "... path="+re.path+"\nfile name="+re.artifact;    
-            say "... the full name of the selected folder is "+re.fullname;    
-            say "... isDir ? = "+re.isDir;    
-        }
-        else
-        {
-            say "... no choice was made so folder will be "+re.path+" and name="+re.fullname;
-	}
-	
-        confirm();
-        say "... IO() home folder of ${home} plus absolute folder of ${folder}  gives target folder of |${fn}|"
     } // end of default constructor
 
     /**
@@ -88,25 +70,6 @@ public class IO
     public IO(boolean ok)
     {
         audit = ok;
-        Chooser ch = new Chooser("Pick input Folder");
-        say "... Pick a folder-only "
-        
-        re = ch.getChoice();
-
-	say "... Response="+re.toString();
-        if (re.chosen && !re.abort)
-        {
-            say "... path="+re.path+"\nfile name="+re.artifact;    
-            say "... the full name of the selected folder is "+re.fullname;    
-            say "... isDir ? = "+re.isDir;    
-        }
-        else
-        {
-            say "... no choice was made so folder will be "+re.path+" and name="+re.fullname;
-	}
-	
-        confirm();
-        //say "... IO() home folder of ${home} plus absolute folder of ${folder}  gives target folder of |${fn}|"
     } // end of non-default constructor
 
 
@@ -115,13 +78,76 @@ public class IO
     // --------------------------------------------------
     
     /**
+     * A method to make all functionkey variables back to original - empty - values
+     */
+    public void reset()
+    {
+        functionkey = "";
+        payload = "";
+        tooltip = "";
+        copybookFilename = "";
+        copybookFound = false;
+        say "... void reset() = ";
+        show();
+    } // end of method
+
+    /**
+     * A method to make all functionkey variables back to original - empty - values, 
+     * then, if valid, parameter string is put in functionkey variable
+     */
+    public boolean reset(String key)
+    {
+        key = (key==null) ? "" : key;
+        boolean yn = false;
+
+        try {
+            key = key.trim();
+            key = ( key.size() < 4 ) ? key.toUpperCase() : key;
+            yn = valid(key);
+
+            if (!yn) 
+            { 
+                say "... reset exception: value |${key}| not usable here; must be within F1..F24 range" 
+                return false;
+            }
+        } 
+        catch(Exception ex) {
+            println("... A reset(${key}) exception failed.");
+            return false;
+        } // end of catch
+
+        functionkey = key;
+        payload = "";
+        tooltip = "";
+        copybookFound = pf.hasFunctionKeyFileName(functionkey);
+        copybookFilename = pf.getFunctionKeyFileName(functionkey);
+        say "... reset(${key}) = "+yn;
+        show();
+        return copybookFound;
+    } // end of method
+
+
+    /**
+     * Method to retrieve a String of payload text from the text payload of a .txt file for this functionkey
+     *
+     * @return String tooltip content of file, if it exists or blank if not
+     */
+    protected String getPayload(String key) 
+    {
+        key = (key==null) ? "" : key;
+        reset(key);
+        boolean yn = read(key);
+        return payload;
+    } // end of method
+
+
+    /**
      * Method to retrieve a String of payload text from the text payload of a .txt file for this functionkey
      *
      * @return String tooltip content of file, if it exists or blank if not
      */
     protected String getPayload() 
     {
-	say "--- IO.getPayload() of |${payload}|"
         return payload;
     } // end of method
 
@@ -131,9 +157,23 @@ public class IO
      *
      * @return String tooltip content of file, if it exists or blank if not
      */
+    public String getToolTip(String key) 
+    {
+        key = (key==null) ? "" : key;
+        reset(key);
+        boolean yn = read(key);
+        functionkey = key;
+        return tooltip;
+    } // end of method
+
+
+    /**
+     * Method to return String of tooltip text from the text payload of a .txt file
+     *
+     * @return String tooltip content of file, if it exists or blank if not
+     */
     public String getToolTip() 
     {
-	say "--- IO.getToolTip() =|${tooltip}|"
         return tooltip;
     } // end of method
 
@@ -145,7 +185,6 @@ public class IO
      */
     public String getFunctionKey() 
     {
-	say "--- IO.getFunctionKey() =|${functionkey}|"
         return functionkey;
     } // end of method
 
@@ -153,28 +192,27 @@ public class IO
     /**
      * Method to load a String of payload text for this functionkey
      *
-     * @param  is text that belongs to this functionkey's payload
+     * @param  txt has text that belongs to this 'functionkey' payload
      * @return String tooltip content of file, if it exists or blank if not
      */
     protected boolean setPayload(String txt) 
     {
-    	this.payload = txt;
-	say "--- IO.setPayload(${payload})"
-	payload = findToolTip(); // is there any || delimited tooltip text at start of this text ?
-        return payload;
+    	//this.payload = txt;
+        //this.tooltip = 
+        converter(txt); // is there any || delimited tooltip text at start of this text ?
+        return true;
     } // end of method
 
 
     /**
      * Method to load a String of tooltip text from a piece of the text payload of a .txt file within a pair of || char.s at the start of text
      *
-     * @param  is text holding the tooltip for this functionkey
+     * @param  is text holding the tooltip for this 'functionkey'
      * @return String tooltip content of file, if it exists or blank if not
      */
     public boolean setToolTip(String txt) 
     {
     	this.tooltip = txt;
-	say "--- IO.setToolTip(${tooltip})"
         return tooltip;
     } // end of method
 
@@ -185,37 +223,17 @@ public class IO
      * @param  is text to show user via println
      * @return String tooltip content of file, if it exists or blank if not
      */
-    public boolean setFunctionKey(String txt) 
+    public boolean setFunctionKey(String key) 
     {
-    	this.functionkey = txt.trim().toUpperCase();
-	boolean yn = valid(functionkey);
-	assert yn==true
-	say "--- IO.setFunctionKey(${functionkey})"
-        return functionkey;
+        key = (key==null) ? "" : key;
+        reset(key);
+        return true;
     } // end of method
 
 
     // --------------------------------------------------
     // Utility Methods
     // --------------------------------------------------
-
-    /**
-     * Initialize this class with the function key
-     */
-    public boolean setup()
-    {
-	say "--- IO.setup() for key ${functionkey}"
-	getFileName();
-
-	//chkobj();
-	present = read(); 
-
-	say "... IO.setup() of |${functionkey}| gives filename of |${filename}|";
-        say "... IO.setup() home folder of ${home} plus absolute folder of ${folder}  gives target folder of |${fn}|"
-	say "... IO.setup(String |${functionkey}|) gives filename of |${filename}|; does it currently exist? "+present;
-	return present;
-    } // end of method
-
 
     /**
      * A method to print an audit log if audit flag is true
@@ -232,34 +250,31 @@ public class IO
     /**
      * A method to see if class level flag says latest known filename points to a real actual file
      *
-     * @return class-level boolean returned
+     * @return yes/no boolean returned
      */
     public boolean exists()
     {
-	say "--- exists()"
-	return present;
+        boolean present = pf.hasFunctionKeyFileName(functionkey)
+        return present;
+    } // end of method
+
+
+    public boolean exists(String key)
+    {
+        reset(key);
+        boolean present = pf.hasFunctionKeyFileName(key)
+        return present;
     } // end of method
 
 
     /* logic to see if a text payload can be found for this function key */
-    public String getFileName()
+    public String getFileName(String functionkey)
     {
-	say "--- IO.getFileName()"
-      	//functionkey = functionkey.trim();
-      	//def i = functionkey.lastIndexOf('.');
-      	//String key = (i<0) ? functionkey : functionkey.substring(0, functionkey.length() - (i+1)) ;
-      	//key = key.trim();
+        functionkey = (functionkey==null) ? "" : functionkey;
 
-      	// true when value is a choice in the range of F1..F24
-      	//boolean yn = valid(key);
-	//if (!yn)  { throw new Exception("... failed to IO.getFileName for |${functionkey}|");}	
-
-	// make input text value into a filename for text files
-      	//if ( i < 0 && functionkey.length() > 0 ) { functionkey += ".txt"; }
-
-      	// compose filename as F1.txt = /Users/jim/copybooks/F1.txt
-      	filename = re.fullname + fs + functionkey + ".txt";
-      	say "\n... IO.getFileName() for key ${functionkey} has filename of |${filename}|"
+      	// compose filename as F1 = /Users/jim/copybooks/F1.txt
+        //boolean good = pf.hasFunctionKeyFileName(functionkey);
+        String filename = pf.getFunctionKeyFileName(functionkey);
       	return filename;
     } // end of method
 
@@ -271,94 +286,161 @@ public class IO
      */
     public boolean valid(String key)
     {
-	say "--- IO.valid(${key})"
-	key = key.trim();
+        say "... valid(String |${key}|) called."
+        key = (key==null) ? "" : key;
+
+        //assert key != null, "... valid(String |${key}|) is null."
+        key = ( key.size() > 3 ) ? key.trim() : key.trim().toUpperCase();
 
         if ( key in keys ) { return true; }
         
-        say "... valid(String |${key}|) will return not valid"
-	throw new RuntimeException("... IO.valid method disallowed use of invalid function key of |${key}|");
-	
-	return false;
+        say "... valid(String |${key}|) is not valid."
+        //throw new RuntimeException("... IO.valid(key) method disallowed use of invalid function key of |${key}|");
+
+        return false;
     } // end of method
 
 
     /**
-     * Method to find String of tooltip text from the text payload of a .txt file
-     *
+     * Method to unpack the input text into possibly two pieces, a tooltip text
+     * assumed to be the first piece, but is optional, and a second piece, the remainder
+     * of text. The tooltip is delimited by | vertical bars. So 
+     * |Hello |   World. 
+     * would give us a tooltip of 'Hello ' and a payload of '   World'
      * @param  String text payload for this function key that may have tooltip text prefix within || delimiters
-     * @return String content of payload from file after tooltip is removed, if it exists, else return original payload
      */
-    private String findToolTip() 
-    {
-	say "--- IO.findToolTip() in payload ${payload})"
-        if (payload==null || payload.size()<1)
-        {
-	    tooltip = "";
-            return "";
-        } // end of if
+    public void converter(String input)
+    { 
+        payload = "";
+        tooltip = "";
+        //println "String=<"+input+">";
+        input = (input==null) ? "" : input.trim();
+            
+        boolean has = (input.startsWith("|"));
+        def ix = input.indexOf('|') 
 
-        String tt = payload.trim();
-        boolean ok = (tt.startsWith("|"));
-        def ix = tt.indexOf('|') 
-        say "... IO.findToolTip() in payload found | at ix=<${ix}>; is tooltip text present ? "+ok;
-
-        if (ok && ix > -1)
+        // true when tooltip is thought to start this text
+        if (has && ix > -1)
         {
-                tt = tt.substring(1);
-                ix = tt.indexOf('|') 
-                tt = payload.trim().substring(1, ix+1);
-		payload = payload.substring(ix+2)
-                say "... IO.findToolTip() tt=<${tt}>";
+            tooltip = input.substring(1);
+            def ix2 = tooltip.indexOf('|') 
+            
+            // no second | found
+            if (ix2 < 0)
+            {
+                payload = input;
+                tooltip = "";
+            }
+            else
+            {
+                payload = tooltip.substring(ix2+1);
+                tooltip = tooltip.substring(0,ix2)
+            
+                ix = tooltip.indexOf('|') 
+            } // end of else          
         } // end of if
         else
         {
-            tt = "";
-            say "... IO.findToolTip() has | at ix=${ix} of first | & no tooltip."
-        }
-
-	tooltip = tt;
-        return payload.trim();
+                payload = input;
+        } // end of else
     } // end of method
 
 
-
-    // --------------------------------------------------
-    // IO File Utility Methods
-    // --------------------------------------------------
+    /**
+     * --------------------------------------------------
+     * IO File Utility Methods
+     * 
+     * Two versions of each method. Methods with no parameters will use existing values for the
+     * declared 'functionkey'
+     *--------------------------------------------------
+     */
 
     /**
-     * Method to read String of text from a file. The @param gives the simple filename. 
-     * This code adds the home and folder name when we look for function key payloads for our F5 app.
-     * Also if missing a trailing suffix like .txt then .txt is added
+     * Method to see if a file exists for any functionkey. It does NOT change state of existing
+     * var.s
      *
-     * boolean present is set/reset here if file exists means there must be a payload and/or tooltip
+     * @param  String simple name of function key to find: F1 = /Users/jim/copybooks/F1.txt
+     * @return Boolean becomes true if it exists or false if not
+     */
+    public boolean chkobj(String key) 
+    {
+        key = (key==null) ? "" : key;
+        // if input value was a good valid choice
+        boolean present = pf.hasFunctionKeyFileName(key);        
+        say "... chkobj(${key}) exists ? "+present+"; looking for functionkey text file for |${key}|";
+        say "    does not change state of var's in this instance"
+        return present;
+    } // end of method
+
+
+    /**
+     * Method to see if a file exists for our function key, using name of the copybook functionkey
+     * but does NOT change state of any var.s for this class instance
+     *
+     * @return class-level boolean becomes true if it exists or false if not
+     */
+    public boolean chkobj() 
+    {
+        boolean present = pf.hasFunctionKeyFileName(functionkey);
+        say "... chkobj(${functionkey}) exists ? "+present+"; looking for this functionkey file.";
+        say "    does not change state of var's in this instance"
+        return present;
+    } // end of method
+
+
+    /**
+     * Method to read String of text from a file. copybookFilename has the filename. 
+     * PathFinder code adds the home and folder name when we look for function key payloads for our F5 app.
+     * Also if missing a trailing suffix like .txt then .txt is added
      *
      * @return  boolean that's true if file was read successfully or else false when it failed
      */
     private boolean read() 
     {
-	say "--- IO.read()"
-        payload = "";
-	tooltip = "";
-	filename = getFileName();
-	boolean good = false;
-		
-        try{
-          payload =  new File(filename).getText('UTF-8');
-          say "... IO.read() found <${filename}> file with ${payload.size()} byte payload";
-	  good = true; 
-	  // strips tooltip from payload if any & populates tooltip variable
-	  payload = findToolTip(); 
-	} // end of if
-	catch(Exception e)
-	{
-          say "... IO.read() found exception reading <${filename}> :" + e.toString();
-	} // end of else
+        say "--- IO.read() default using functionkey of "+functionkey;
 
+        assert functionkey != null, ".. -> IO.read() found functionkey of null & failed"
+        boolean good = pf.hasFunctionKeyFileName(functionkey);
+        copybookFilename = pf.getFunctionKeyFileName(functionkey);
+		
+        if (good)
+        {
+            try
+            {
+                def xxx =  new File(copybookFilename).getText('UTF-8');
+                say "... IO.read() found <${copybookFilename}> file with ${xxx.size()} byte payload";
+                good = true; 
+                
+                // strips tooltip from payload if any & populates tooltip variable
+                converter(xxx); 
+                show();
+            } // end of try
+            catch(Exception e)
+            {
+                say "... IO.read() found exception reading <${copybookFilename}> :" + e.toString();
+                good = false;
+            } // end of else
+        } // end of if good
+
+        say "--- IO.read() returned="+good;
         return good;
     } // end of method
 
+
+    /**
+     * Method to read String of text from a file.  
+     * boolean copybookFound is set/reset here if file exists meaning there must be a payload and/or tooltip
+     *
+     * @return  boolean that's true if file was read successfully or else false when it failed
+     */
+    private boolean read(String key) 
+    {
+        say "--- IO.read(${key})"
+        key = (key==null) ? "" : key;
+        reset(key);   // keeps new 'key' in functionkey var.
+        show();
+        return read();
+    } // end of method
 
 
     /**
@@ -366,20 +448,23 @@ public class IO
      * filename has simple name of text file to write like F12.txt
      *
      * @param  String of text to write to file
+     * @param  String of name of file to write to 
      * @return true, if write was successful
      */
-    public boolean write(String payload) 
+    public boolean write(String payload, String filename) 
     {
-	say "--- IO.write(${payload})"
-    	def file3 = new File(filename)
-        present = file3.exists();
+        say "--- IO.write(${payload} ${filename})"
+    	def file5 = new File(filename)
+        boolean present = file5.exists();
+        def x3 = (present) ? "yes" : "no";
+        say "    ${filename}) present="+x3;
 
         try
         {
             if (payload==null) { payload=""; }
-	    file3.withWriter('UTF-8') { writer ->
-            	writer.write(payload)
-	    } // end of withWriter
+                file5.withWriter('UTF-8') { writer ->
+                writer.write(payload)
+            } // end of withWriter
             present = true;
         } // end of try
         catch(IOException x)
@@ -388,36 +473,75 @@ public class IO
             present = false;
         }
 
+        say "   returned:"+present;
         return present;
     } // end of method
 
 
     /**
-     * Method to write String of text to a simple named file; this method will prefix our own home + folder names
+     * Method to write String of text to a simple named file; this method will use our own home + folder + file name
+     * filename has simple name of text file to write like /Users/jim/copybooks/F12.txt
      *
-     * @param  String simple name of text file to write like F12.txt
      * @param  String of text to write to file
      * @return true, if write was successful
      */
-    public boolean write(String key, String payload) 
+    public boolean write(String payload) 
     {
-	say "--- IO.write(${payload})"
-    	def file4 = new File(key)
-        present = file4.exists();
+        // present may be false if this payload file never existed, or not there
+        boolean present = pf.hasFunctionKeyFileName(functionkey);
+        String filename = pf.getFunctionKeyFileName(functionkey);
+
+        say "--- IO.write(${payload} ${filename}) present="+present;
+        def file6 = new File(filename)
+
         try
         {
             if (payload==null) { payload=""; }
-	    file4.withWriter('UTF-8') { writer ->
-            	writer.write(payload)
-	    } // end of withWriter
+                file6.withWriter('UTF-8') { writer ->
+                writer.write(payload)
+            } // end of withWriter
             present = true;
         } // end of try
         catch(IOException x)
         {
-            say "...  IO.write method failed to write <${key}> due to:"+x.message;
+            say "... IO.write method failed to write <${filename}> due to:"+x.message;
             present = false;
         }
 
+        say "   returned:"+present;
+        return present;
+    } // end of method
+
+    /**
+     * Method to write current payload String of text to a simple named file; 
+     * this method will use our own home + folder + file name where
+     * filename has simple name of text file to write like /Users/jim/copybooks/F12.txt
+     *
+     * @return true, if write was successful
+     */
+    public boolean write() 
+    {
+        boolean present = pf.hasFunctionKeyFileName(functionkey);
+        String filename = pf.getFunctionKeyFileName(functionkey);
+
+        say "--- IO.write(${payload} ${filename}) present="+present;
+        def file7 = new File(filename)
+
+        try
+        {
+            if (payload==null) { payload=""; }
+            file7.withWriter('UTF-8') { writer ->
+                writer.write(payload)
+            } // end of withWriter
+            present = true;
+        } // end of try
+        catch(IOException x)
+        {
+            say "... IO.write method failed to write <${filename}> due to:"+x.message;
+            present = false;
+        }
+
+        say "   returned:"+present;
         return present;
     } // end of method
 
@@ -428,66 +552,58 @@ public class IO
      * @param  String simple name of text file to write like F12.txt
      * @return true, if delete was successful
      */
+    public boolean delete(String key) 
+    {
+        key = (key==null) ? "" : key;
+        say "--- IO.delete(${key})"
+        reset(key);
+        def file8 = new File(copybookFilename)
+        boolean present = file8.delete();
+        say "... deleted file <${copybookFilename}> ? "+present;
+        return present;
+    } // end of method
+
+
+    /**
+     * Method to delete and remove a simple named file; this method will prefix our own home + folder names
+     *
+     * @return true, if delete was successful
+     */
     public boolean delete() 
     {
-	say "--- IO.delete()"
-        def file3 = new File(filename)
-        present = file3.delete();
+        say "--- IO.delete()"
+        boolean present = pf.hasFunctionKeyFileName(functionkey);
+        String filename = pf.getFunctionKeyFileName(functionkey);
+
+        def file9 = new File(filename)
+        present = file9.delete();
         say "... deleted file <${filename}> ? "+present;
         return present;
     } // end of method
 
 
     /**
-     * Method to see if a file exists for provided filename
-     * This code does changes filename to be confirmed; but the home plus copybooks/ folder names are added by our method.
+     * Method to display current values of all metadata
      *
-     * @param  String simple name of text file to read: F1.txt= /Users/jim/copybooks/F1.txt
-     * @return class-level boolean becomes true if it exists or false if not
      */
-    public boolean chkobj() 
+    public boolean show()
     {
-      	present = false;
-
-      	// if input value was a good valid choice
-      	present = new File(filename).exists();
-      	
-      	say "... IO.chkobj() exists ? "+present+"; looking for file |${filename}|";
-
-      	return present;
-    } // end of method
-
-
-    /**
-     * Method to confirm copybooks folder exists, or build it if it does not
-     *
-     * @return true, if folder build was successful
-     */
-    private boolean confirm() 
-    {
-	say "--- IO.confirm() will use |${re.fullname}|"
-        def fi = new File(re.fullname);
-        boolean yn = fi.exists() ? true : false;
-        String fo = fi.getAbsolutePath(); //re.fullname;
-        if (!yn)
-        {
-            say "... confirm() folder fo=<${fo}> to build '${re.fullname}';"
-            FileTreeBuilder treeBuilder = new FileTreeBuilder(new File(fo))
-            treeBuilder.dir(fo);
-            say "... confirm() ${re.fullname} built folder"
-            yn = true;
-        } // end of if
-	else
-	{
-	    //fo = home + folder;
-	    re.fullname = fo;
-            say "... confirm() folder fo=<${fo}> already exists to build '${re.fullname}';"
-	} // end of else
-
-	say "... end of confirm()\n\n"
-        return yn;
-    } // end of method
-
+        say "-------------------------|"
+        say " IO functionkey         =|"+functionkey+"|";
+        say "    copybookFound       =|"+copybookFound+"|";
+        say "    copybookFilename    =|"+copybookFilename+"|";
+        say "    tooltip             =|"+tooltip+"|";
+        say "    payload             =|"+payload+"|";
+        say "    PathFinder variables:"
+        say "    pf.currentDirectory =|"+pf.currentDirectory+"|";
+        say "    pf.home             =|"+pf.home+"|";
+        say "    pf.homePath         =|"+pf.homePath+"|";
+        say "    pf.metafile         =|"+pf.metafile+"|";
+        say "    pf.metaFound        =|"+pf.metaFound+"|";
+        say "    pf.copyPathFound    =|"+pf.copyPathFound+"|";
+        say "    pf.copyPathDirectory=|"+pf.copyPathDirectory+"|";
+        say " ";
+    } // end of show
 
 
     // =============================================================================    
@@ -504,179 +620,194 @@ public class IO
         println "Hello from IO.groovy"
         println "... ------------------------"
         IO ck = new IO(true);
-        ck.setup();  //"F12");
-        
-	ck.say "... F12.filename ? "+ck.filename;
-	ck.say "... F12.present ? "+ck.present;
-	ck.say "... F12.functionkey ? "+ck.functionkey;
-	ck.say "... F12.payload ? "+ck.payload;
-	ck.say "... F12.tooltip ? "+ck.tooltip;
-System.exit(0);
+        ck.show();
+        ck.reset();
+        ck.show();
+        def xx = ck.getPayload() 
+        println "    no key payload is "+xx;
+        xx = ck.getPayload("F1") 
+        println "    ck.getPayload() is "+xx;
+
+        String x5 = " f17 ";
+        ck.reset(x5);
+        ck.show();
+
+        ck.reset("f13");
+        ck.show();
+
+        boolean ok = true;
+        ok = ck.delete(); 
+        ck.say "    ok="+ok;
+        ck.show();
+
+        ok = ck.delete("F13"); 
+        ck.say "    ok="+ok;
+        ck.show();
+
+        ok = ck.delete("/Users/jim/copybooks/F13.txt"); 
+        ck.say "    ok="+ok;
+        ck.show();
+
+        ok = ck.setFunctionKey("F12"); 
+        ck.say "    ok="+ok;
+        ck.show();
+
+        x5 = ck.getPayload("F12");     
+        ck.say "    x5="+x5;
+        ck.show();
+
+        x5 = ck.getPayload();
+        ck.say "    x5="+x5;
+        ck.show();
+
+        x5 = ck.getPayload("F13");
+        ck.say "    x5="+x5;
+        ck.show();
+
+        x5 = ck.getPayload();
+        ck.say "    x5="+x5;
+        ck.show();
 
 
+        //ck.say "... F12.filename ? "+ck.filename;
+        //ck.say "... F12.present ? "+ck.present;
+        ck.say "... ck.functionkey ? "+ck.functionkey+" copybookFound="+ck.copybookFound+" for "+ck.copybookFilename;
+        ck.say "... ck.payload ? "+ck.payload+" copybookFound="+ck.copybookFound+" for "+ck.copybookFilename;
+        ck.say "... ck.tooltip ? "+ck.tooltip+" copybookFound="+ck.copybookFound+" for "+ck.copybookFilename;
 
-	println ""	
-	ck.say "... confirm root copybooks folder exists:"+ck.confirm();
-        boolean flag = ck.chkobj();
-	println "... flag=${flag} while file "+ck.filename+" exists ? "+ck.exists();
-	println " "
-	ck.say "... ck.payload ? "+ck.payload;
-	ck.say "... ck.tooltip ? "+ck.tooltip;
+        // start again ....
+        ck = new IO(true);
+        ck.show();
 
-	String g = "|Here's a tip|Hi kids";
-	println "\n... g="+g;
-	g = ck.findToolTip();
-	ck.say "\n... ck.findToolTip() returned this:'"+g+"'";
-	ck.say "... ck.tooltip ? '"+ck.tooltip+"'";
+        x5 = ck.getToolTip("F18");
+        ck.say "--- New IO()"
+        ck.show();
+        ck.say "    getToolTip with value --------"
+        ck.say "    getToolTip(F18)  =|"+x5+"| |"+ck.functionkey+"| copybookFound="+ck.copybookFound+" for "+ck.copybookFilename;
 
-	g = ck.findToolTip();
-	println "\n... g="+g;
-	ck.say "\n... ck.findToolTip() with no tooltip returned this:'"+g+"'";
-	ck.say "... ck.tooltip ? '"+ck.tooltip+"'";
+        x5 = ck.getToolTip();
+        ck.say "    getToolTip with no value ------"
+        ck.say "    getToolTip()     =|"+x5+"| |"+ck.functionkey+"| copybookFound="+ck.copybookFound+" for "+ck.copybookFilename;
+
+        ok = ck.exists();
+        ck.say "    exists()         =|"+ok+"| |"+ck.functionkey+"| copybookFound="+ck.copybookFound+" for "+ck.copybookFilename;
+        ok = ck.exists("F24");
+        ck.say "    exists(F24)      =|"+ok+"| |"+ck.functionkey+"| copybookFound="+ck.copybookFound+" for "+ck.copybookFilename;
 
 
-	g = ck.findToolTip();
-	println "\n... g="+g;
-	ck.say "\n... ck.findToolTip() for empty string returned this:'"+g+"'";
-	ck.say "... ck.tooltip ? '"+ck.tooltip+"'";
+        ck.say ""	
+        boolean flag = ck.chkobj("F1");
+        ck.say "... flag="+flag;
+        ck.say "... ck.payload ? "+ck.payload;
+        ck.say "... ck.tooltip ? "+ck.tooltip;
 
-	g = ck.findToolTip();
-	println "\n... g="+g;
-	ck.say "\n... ck.findToolTip() for null string returned this:'"+g+"'";
-	ck.say "... ck.tooltip ? '"+ck.tooltip+"'";
+        String g = "|Here's a tip|Hi kids; this is a sample payload with tooltip.";
+        ck.say "\n... g="+g;
+        ck.converter(g);
+        ck.say "\n... ck.converter() returned this payload:'"+ck.payload+"'";
+        ck.say "... ck.tooltip ? '"+ck.tooltip+"'";
 
-        println "... ------------------------"
-        ck = new IO("F23",true);
-	ck.say "... F23.filename ? "+ck.filename;
-	ck.say "... F23.present ? "+ck.present;
-	ck.say "... F23.payload ? "+ck.payload;
-	ck.say "... F23.tooltip ? "+ck.tooltip;
-	println ""	
+        ck.say "... ------------------------"
+        ck = new IO(true);
+        ck.say "... functionkey ? "+ck.functionkey;
+        //ck.say "... F23.present ? "+ck.present;
+        ck.say "... payload ? "+ck.payload;
+        ck.say "... tooltip ? "+ck.tooltip;
+        ck.say "";	
 
-        println "... ------------------------"
+        ck.say "... ------------------------"
 
-        println "\n---------------- F15  -----------------------------"
-        String fn = "F15";
-	try{
-		ck = new IO(fn,true);
-        	boolean ok = ck.delete();
-        	println "... did we delete ${fn} file named |${ck.filename}| ? :"+ok;
-
-		ok = ck.write("|F15 tooltip goes here|Payload for F15 is here.");
-        	println "... did we write tooltip to <${ck.filename}> file ok ? :"+ok;
-	} 
-	catch (Exception xx)
-	{ println "... F15.txt failed:"+xx;}
+        ck.say "\n---------------- F15  -----------------------------"
+        String ky = "F15";
+        try{
+            ck = new IO(true);
+            ck.reset(ky);
+        	ok = ck.delete();
+        	ck.say "... did we delete |${ky}| file named |${ck.copybookFilename}| ? :"+ok;
+            def dt = new Date().toString();
+            ok = ck.write("|F15 tooltip goes here|Payload for F15 is here on "+dt);
+        	ck.say "... did we write tooltip to <${ck.copybookFilename}> file ok ? :"+ok;
+        } 
+        catch (Exception x6)
+        { 
+            ck.say "... F15 access failed:"+x6;
+        }
 
         // use chkobj to confirm F15.txt is there 
-        boolean yn = ck.chkobj();
-	println "... file "+ck.filename+" exists ? "+ck.exists();
-	String tx = "";
+        ck.say "\n"
+        ck.say "... ck.pf.CopyPathDirectory:"+ck.pf.getCopyPathDirectory();
+        ck.say "... ck.copybookFilename:"+ck.copybookFilename;
+        ck.say "... ck.functionkey        :"+ck.functionkey;
 
+        boolean yn = ck.chkobj(ck.functionkey);
+        ck.say "... ck.functionkey="+ck.functionkey+" yn="+yn;
+        ck.say "... file "+ck.functionkey+" exists ? "+ck.exists("/Users/jim/copybooks/F15.txt");
+        String tx = "";
+
+        ck.say "\n -----------------"
         if (yn)
         {
-	    ck.filename = ck.getFileName();
-	    println "... yn=${yn} and file "+ck.filename+" exists ? "+ck.exists();
-	    tx = ck.read();
-    	    println "... <${fn}> read found:"+tx.length()+" bytes in file "+ck.filename;
-    	} // end of if
+            ck.say "... yn="+yn;
+            ck.say "... yn="+yn;
+            ck.copybookFilename = ck.pf.getFunctionKeyFileName();
+            ck.say "... yn=${yn} and file "+ck.copybookFilename+" exists ? "+ck.exists(ck.getCopybookFilename())+"\n ";
+            
 
-        println ""
-        println "\n---------------- F17  -----------------------------"
-        fn = "F17.txt";
-	try{
-		ck = new IO(fn,true);
-	        yn = ck.write("ok now we write ${ck.filename} file");
-	} 
-	catch (Exception xx){ println "... F17.txt failed:"+xx;}
-        println "... did we write <${ck.filename}> ok ? :"+yn; // yes, writes to previously good invoke of IO module with F15 choice, so this msg goes into F15.txt
+            tx = ck.read();
+            ck.say "... <${ky}> read found:"+tx.length()+" bytes in file "+ck.copybookFilename;
+        } // end of if
+            
+        ck.say ""
+        ck.say "\n---------------- F17  -----------------------------"
+        ky = "f17";
+        try{
+            ck = new IO(true);
+            ck.reset(ky);
+            yn = ck.exists();
+            if (yn) 
+            { 
+                yn = ck.delete();
+                ck.say "    delete() yn="+yn; 
+            } // end of if
 
+            yn = ck.write("ok now we write ${ck.copybookFilename} file");
+            ck.say "... F17 write trial gave yn="+yn;
+            
+            yn = ck.delete(ky);
+            ck.say "    delete(${ky}) yn="+yn; 
+        } 
+        catch (Exception x7)
+        { 
+            ck.say "... F17.txt failed:"+x7;
+            yn = false;
+        }
 
-        // try without file .txt suffix
-        println ""
-        println "\n---------------- F13  -----------------------------"
-        fn = "F13";
-	ck = new IO(fn,true);
-        tx = ck.getPayload();
-        if (tx.size() > 0) { println "... found <${fn}> file ? :\n    payload has "+tx.size()+" bytes"; }
-        if (tx.size() < 1) { println "    - no payload found for |${fn}|"}
+        x5 = (yn) ? "yes" : "no"; 
+        ck.say "... did we fix <${ck.copybookFilename}> ok ? :"+x5; // yes, writes to previously good invoke of IO module with F15 choice, so this msg goes into F15.txt    
 
-        println ""
-        println "\n---------------- F14  -----------------------------"
-        fn = "F14";
-	ck = new IO(fn,true);
-        tx = ck.getPayload();
-        println "... found <${fn}> file ? "
-        println "... payload has "+tx.size()+" bytes";
-        if (tx.size() < 1) { println "... no payload found for <${fn}>"}
-
-        println ""
-        tx = ck.getToolTip();
-        println "... found <${fn}> tooltip file ? "
-        println "... payload has "+tx.size()+" bytes";
-        if (tx.size() < 1) { println "    - no tooltips found for <${fn}>"}
-
-        println ""
-        println "\n---------------- F18  -----------------------------"
-        fn = "F18";
-	ck = new IO(fn,true);
-        boolean ok = ck.write("|F18 tooltip goes here|The payload for F18 is this.");
-        println "... did we write tooltip to <${fn}> file ok ? :"+ok;
-
-        println ""
-        println "\n---------------- F19  -----------------------------"
-        fn = "F19";
-	ck = new IO(fn,true);
-        ok = ck.delete();
-        if (ok){ println "... deleted F19.txt"; }
-        if (!ok){ println "... did not delete F19 file "+ck.filename; }
-        ok = ck.write("");
-        println "... did we write tooltip to <${ck.filename}> file ok ? :"+ok;
-        tx = ck.getToolTip();
-        if (tx.size() < 1) { println "    - no tooltips found for <${fn}>"}
-        tx = ck.getPayload();
-        if (tx.size() < 1) { println "    - no payload found for <${fn}>"}
+        println "\n\n------------------------\n Test Session Two"
+        IO io = new IO(true);
+        io.show();
+        io.say "   io.getFunctionKey() default="+io.getFunctionKey();
+        io.say "   io.getToolTip() default="+io.getToolTip();
+        io.say "   io.getPayload() default="+io.getPayload();
+        io.say "   io.exists() default="+io.exists();
 
 
-        println "\n---------------- F20  -----------------------------"
-	ck = new IO("F20",true);
-        ck.getFileName();
-        boolean ok2 = ck.delete();
-        if (ok2){ println "... deleted F20"; }
+        io.reset();
+        io.show();
+        io.reset("F2")
+        io.show();
         
-        ok2 = ck.write(null);
-        println "... did we write tooltip to F20 file ok ? :"+ok2;
-
-        tx = ck.getToolTip();
-        if (tx.size() < 1) { println "    - no tooltips found for F20"}
-        if (tx.size() > 0) { println "    - tooltip found for F20 has "+tx.size()+" bytes"}
+        boolean ok2 = io.chkobj();
+        io.say "    ok2="+ok2;
+        io.show();
+        boolean ok3 = io.chkobj("F1"); 
+        io.say "    ok3="+ok3;
+        io.show();
+        io.reset(); // what values after default reset ?
+        io.show();
         
-        tx = ck.getPayload();
-        if (tx.size() < 1) { println "    - no payload found for F20"}
-        if (tx.size() > 0) { println "    - payload found for F20 has "+tx.size()+" bytes"}
-
-        println "-------------------------------------------------"
-	ok2 = ck.valid("F2");
-	println "... is this F2 value a valid text value for this module ? :"+ok2;
-
-        println "-------------------------------------------------"
-	try{ ok2 = ck.valid("F2.adoc"); } catch(Exception x) { println "... F2.adoc failed";};
-	println "... is this F2.adoc value a valid text value for this module ? :"+ok2;
-
-        println "-------------------------------------------------"
-	try{ ok2 = ck.valid("F26"); } catch(Exception x) { println "... F26 failed";};
-	println "... is this F26 value a valid text value for this module ? :"+ok2;
-
-        println "\n---------------- typical logic flow  -----------------------------"
-	IO io = new IO("F12",true);
-	println "... is this unset value a valid text value for this module ? :"+ok2;
-        println "... is any function set at start of this class invoke ? "+io.exists();
-	String ss = "";
-        println "... is any 'blank' filename known for this function value set at start of class ? "+io.chkobj();
-
-
-
-
         println "\n--- the end---"
     } // end of main 
 

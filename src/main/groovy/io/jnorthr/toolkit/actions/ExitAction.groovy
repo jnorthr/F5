@@ -16,9 +16,14 @@ public class ExitAction extends AbstractAction
     putValue(MNEMONIC_KEY, mnemonic);
   }
 
+  public ExitAction(String shortDescription, Integer mnemonic)
+  {
+    putValue(SHORT_DESCRIPTION, shortDescription);
+    putValue(MNEMONIC_KEY, mnemonic);
+  }
+
   public void actionPerformed(ActionEvent e)
   {
-    //JOptionPane.showMessageDialog(null, "Would have done the 'Cut' action.");
     System.exit(0);
   }
 }
