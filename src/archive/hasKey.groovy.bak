@@ -1,0 +1,12 @@
+String va = null;
+
+// method to confirm string is a valid function key choice
+public boolean hasKey(String val)
+{    
+    String ky = (val != null) ? val.toUpperCase() : "";
+    def list = ["F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","F13","F14","F15","F16","F17","F18","F19","F20","F21","F22","F23","F24"];
+    def yn = list.contains(ky);
+} // end of hasKey
+
+println "Does list have ${va} ? "+hasKey(va);
+println "--- the end ---"

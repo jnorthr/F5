@@ -18,7 +18,7 @@ package io.jnorthr.toolkit;
 public class IO
 {
     /** If we need to print audit log to work, this will be true */ 
-    private boolean audit = true;
+    private boolean audit = false;
 
     /** a class of most recent system and app metadata values for this F5 app */ 
     PathFinder pf = new PathFinder();
@@ -110,8 +110,13 @@ public class IO
                 say "... reset exception: value |${key}| not usable here; must be within F1..F24 range" 
                 return false;
             }
+			else
+			{
+				functionkey = key;
+			} // end of else
         } 
-        catch(Exception ex) {
+        catch(Exception ex) 
+		{
             println("... A reset(${key}) exception failed.");
             return false;
         } // end of catch
@@ -122,7 +127,7 @@ public class IO
         copybookFound = pf.hasFunctionKeyFileName(functionkey);
         copybookFilename = pf.getFunctionKeyFileName(functionkey);
         say "... reset(${key}) = "+yn;
-        show();
+        
         return copybookFound;
     } // end of method
 
@@ -596,11 +601,7 @@ public class IO
         say "    payload             =|"+payload+"|";
         say "    PathFinder variables:"
         say "    pf.currentDirectory =|"+pf.currentDirectory+"|";
-        say "    pf.home             =|"+pf.home+"|";
         say "    pf.homePath         =|"+pf.homePath+"|";
-        say "    pf.metafile         =|"+pf.metafile+"|";
-        say "    pf.metaFound        =|"+pf.metaFound+"|";
-        say "    pf.copyPathFound    =|"+pf.copyPathFound+"|";
         say "    pf.copyPathDirectory=|"+pf.copyPathDirectory+"|";
         say " ";
     } // end of show
@@ -619,14 +620,28 @@ public class IO
     {
         println "Hello from IO.groovy"
         println "... ------------------------"
-        IO ck = new IO(true);
-        ck.show();
-        ck.reset();
-        ck.show();
-        def xx = ck.getPayload() 
-        println "    no key payload is "+xx;
-        xx = ck.getPayload("F1") 
-        println "    ck.getPayload() is "+xx;
+        IO ck = new IO();
+        ck.reset("F12");
+        //ck.show();
+        def xx = ck.getPayload(); 
+        println "    F12 key payload is    |"+xx+"|";
+        xx = ck.getPayload("F12") 
+        println "    ck.getPayload(F12) is |"+xx+"|";
+	xx = ck.getToolTip();
+        println "    ck.getToolTip() is |"+xx+"|";
+
+        ck.reset("F11");
+        xx = ck.getPayload() 
+        println "    F11 key payload is    |"+xx+"|";
+        xx = ck.getPayload("F11") 
+        println "    ck.getPayload(F11) is |"+xx+"|";
+	xx = ck.getToolTip();
+        println "    ck.getToolTip() is |"+xx+"|";
+	ck.show();
+
+System.exit(0);
+
+
 
         String x5 = " f17 ";
         ck.reset(x5);

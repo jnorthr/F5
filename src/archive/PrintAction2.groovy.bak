@@ -1,0 +1,61 @@
+package io.jnorthr.toolkit;
+
+//import io.jnorthr.toolkit.actions.PrintAction;
+import javax.swing.ImageIcon;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+
+printbutton = new JButton("Print");
+printKeyStrokeHit = KeyStroke.getKeyStroke("PRINT");
+
+public class PrintAction extends AbstractAction
+{
+  public PrintAction(String name, ImageIcon icon, String shortDescription, Integer mnemonic)
+  {
+    super(name, icon);
+    putValue(SHORT_DESCRIPTION, shortDescription);
+    putValue(MNEMONIC_KEY, mnemonic);
+  }
+
+  public void actionPerformed(ActionEvent e)
+  {
+    JOptionPane.showMessageDialog(null, "Would have done a screen print action.");
+    def fn = System.getProperty("output.file");
+
+    String currentDirectory  = System.getProperty("user.dir") + File.separator;
+    if ( fn == null ) { fn = "${currentDirectory}screenprint.png" }
+
+    def size = Toolkit.getDefaultToolkit().getScreenSize();
+    java.awt.Rectangle pic = new Rectangle(size);
+    
+    ImageIO.write(new Robot().createScreenCapture(pic),"png", new File(fn));  
+  } // end of actionPerfiormed method
+
+} // end of class
+
+
+
+
+
+public JButton makePrintButton()
+{
+ImageIcon printer = new ImageIcon("images/CROSS.png");
+Action printAction = new PrintAction("PRINT", printer, "Screen Print", new Integer(KeyEvent.VK_UP))
+printbutton.setFont(new Font("Arial", Font.BOLD, 8));
+printbutton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(printKeyStrokeHit, "PRINT");
+printbutton.getActionMap().put("Print", printAction);
+printbutton.setAction(printAction); // when button mouse clicked
+printAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_UP);  //KeyEvent.VK_LEFT
+return printbutton;
+} // end of makePrintButton
+
+
+
+printbutton = makePrintButton();
+println "printbutton="+printbutton.toString();
+println "--- the end ---"

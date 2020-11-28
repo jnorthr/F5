@@ -1,4 +1,5 @@
 package io.jnorthr.toolkit;
+import javax.swing.JFrame;
 
 /**
  * This class retains the instance values for the currently running F5 class
@@ -19,7 +20,7 @@ public class F5Data
 	*
 	* a key/value map storage for known Function Keys with a boilerplate 'payloads' below that can be copied to 
 	* system clipboard; key is like F12 or F2 while value is true if payload text exists  
-    	*/
+    */
 	Map hasPayload = [:]
 
 	/**
@@ -37,41 +38,52 @@ public class F5Data
 	*/
 	Map buttons = [:]
 
-
 	/**
 	* This variable holds current working directory name and home path name of this user to be used in F5
 	*/
-    PathFinder pf;
-    
+    IO io = new IO();
+
+	JFrame frame = null;
+	
 	/** If we need to println audit log to work, this will be true */ 
-    boolean audit = true;    
+    boolean audit = false;    
         
     // constructor    
 	public F5Data()
-	{
-        pf = new PathFinder();
- 
-        println "... F5Data from PathFinder user.home (homePath) ="+pf.getHomePath();
-        println "... F5Data from PathFinder user.dir (pwd)="+pf.getCurrentDirectory();
+	{ 
+        //println "... F5Data from IO.PathFinder user.home (homePath) ="+io.pf.getHomePath();
+        //println "... F5Data from IO.PathFinder user.dir (pwd)="+io.pf.getCurrentDirectory();
+		getAvailableTooltips();
 	} // end of constructor
     
 
 	/**
-     * A method to print an audit log if audit flag is true
-     *
-     * @param  is text to show user via println
-     * @return void
-     */
-     public void say(String text)
-     {
+	* A method to print an audit log if audit flag is true
+    *
+    * @param  is text to show user via println
+    * @return void
+    */
+    public void say(String text)
+    {
      	if (audit) { println text; }
-     } // end of method
+    } // end of method
 
 	/**
-     * A method to show internal session variables if audit flag is true
-     *
-     * @return void
-     */
+	* A method to remember the frame used by this whole app.
+    *
+    * @param  f provides the F5GUI declared JFrame address
+    * @return void
+    */
+    public void setFrame(JFrame f)
+    {
+     	frame = f;
+    } // end of method
+
+	/**
+    * A method to show internal session variables if audit flag is true
+    *
+    * @return void
+    */
     public void dump()
     {
     	say "\nF5Data internals:"
@@ -85,6 +97,49 @@ public class F5Data
 		} // end of each
 
     	say "\nF5Data end"
+   	} // end of method
+
+
+    /**
+     * A method to get known tooltip text from external file named after a function key; so
+     * tooltip text for help in F2.txt is for the F2 function key and also holds payload; or
+     * F11.txt holds tip for F11 function key while it may/maynot have the text we copy to
+     * clipboard if/when F11 key is pressed (or clicked).
+     *
+     * Note that these simple .txt files are made in the TemplateMaker class that are found in user home directory
+     * plus folder picked in the Chooser dialog plus F1 plus .txt giving /Users/jim/myfolder/F1.txt file name
+     *
+     * @return map of known tooltips per function key
+     */
+    public Map getAvailableTooltips()
+    {
+    	say "... getAvailableTooltips() starting --"
+    	tooltips["ESC"] = "ESC key ends this app";
+    	tooltips["PRINTSCREEN"] = "The Alt-P key makes full screen copy in screenprint.png";
+    	tooltips["PRINT"] = "The Alt-P key makes full screen copy in screenprint.png";
+
+		(1..12).eachWithIndex{ num, ix ->
+			String ky = "F${ix+1}";
+			say "... getAvailableTooltips for ky=|F${ix+1}|"
+
+	        /*
+	        * takes only simple key name like F3 or F3.txt to find a filename like /Users/jim/copybooks/F3.txt
+			*/
+			io.reset(ky);
+
+			// remember which function key has boilerplate file by setting it to true or false flag set in IO module
+			hasPayload[ky] = io.chkobj(ky);  //io.present;
+	        String tx = io.getPayload(ky);
+
+	        // keep the text content of file just read in internal array
+        	payloads[ky]=tx;
+
+	    	tooltips[ky] = io.getToolTip(ky);
+		} // end of eachWithIndex
+
+		dump();
+
+    	return tooltips;
     } // end of method
 
 
@@ -101,9 +156,9 @@ public class F5Data
 	{
 		println "-------------------------"
 		F5Data f5d = new F5Data();
-		f5d.hasPayload["F1"] = true;
-		f5d.tooltips["F1"] = "Tooltip for F1";
-		f5d.payloads["F1"] = "Hello World";
+		f5d.hasPayload["F11"] = true;
+		f5d.tooltips["F11"] = "Tooltip for F11";
+		f5d.payloads["F11"] = "Hello World";
 		f5d.audit = true;
 		f5d.dump();
 		println "--- the end of F5Data ---"

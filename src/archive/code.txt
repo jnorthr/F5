@@ -1,0 +1,309 @@
+    /**
+     * Method to write String of text to a simple named file; this method will use our own home folder name + file name of .F5.txt
+     *
+     * @param  String of text to write to file
+     * @return true, if write was successful
+     */
+    public boolean writeXX(String payload) 
+    {
+        say "--- write(${payload}) into "+metaFileName;	
+    	def file3 = new File(metaFileName)
+        boolean present = file3.exists();
+
+        try
+        {
+            if (payload==null) { payload=""; }
+            file3.withWriter('UTF-8') { writer ->
+            	writer.write(payload)
+            } // end of withWriter
+            present = true;
+        } // end of try
+        
+        catch(IOException x)
+        {
+            say "...  write method failed to write <${metaFileName}> due to:"+x.message;
+            present = false;
+        }
+
+        return present;
+    } // end of method
+
+
+   /**
+    * Method to prepare class variables by reading a possibly non-existent cache file written in prior run.
+    * It holds name of folder holding payloads for our F5 function key choices.
+    */
+    public boolean setup()
+    {
+        say "\n... Chooser.setup() has initialPath=|${initialPath}|"
+        boolean present = pf.fnFound; //new File(initialPath).exists();
+        def initialPath = pf.home;
+
+        if (pf.copybookFound) 
+        { 
+            re.artifact = pf.getCopybookPath(); 
+            if (pf.home.size() > 0)
+            {
+                re.fullname = pf.home;
+            } // end of if
+        } // end of if 
+        else
+        {
+            initialPath = pf.home;
+        } // end of else
+
+        say "... Chooser.setup() metadata file was present=${present} in initialPath=|${pf.home}|"
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        
+        File fi = new File(pf.home);
+        fc.setCurrentDirectory(fi);   
+        present = new File(pf.home).exists();
+        return present;
+    } // endof setup
+
+// chooser vars
+
+    /** an O/S specific char. as a file path divider */
+    //String fs = java.io.File.separator;
+
+    /** an O/S specific location for the user's home folder name plus a trailing file separator*/ 
+    //String home = pf.home; // System.getProperty("user.home")+fs;
+
+    /** a folder-relative location for the user's home folder name */ 
+    //String folder = "copybooks"+fs;
+
+    /**
+    * a folder-relative location for the user's filename storage location currently being revised/written
+    * like /Users/jim/copybooks/F1.txt,etc.
+    */ 
+    //String fn = pf.fn;
+
+    /**
+    * present is true if 'fn' file exists meaning there must be a payload and/or tooltip
+    */
+    //private boolean present = false;
+
+
+// chooser constructor
+/*        
+        Chooser ch = new Chooser("Pick input Folder");
+        say "... Pick a folder-only "
+        
+        re = ch.getChoice();
+        say "... Response="+re.toString();
+        if (re.chosen && !re.abort)
+        {
+            say "... path="+re.path+"\nfile name="+re.artifact;    
+            say "... the full name of the selected folder is "+re.fullname;    
+            say "... isDir ? = "+re.isDir;    
+        }
+        else
+        {
+            say "... no choice was made so folder will be "+re.path+" and name="+re.fullname;
+        }
+    
+        confirm();
+        say "... IO() home folder of ${home} plus absolute folder of ${folder}  gives target folder of |${fn}|"
+*/
+
+/*     chooser constructor   
+        Chooser ch = new Chooser("Pick input Folder");
+        say "... Pick a folder-only "
+        
+        re = ch.getChoice();
+
+        say "... Response="+re.toString();
+        if (re.chosen && !re.abort)
+        {
+            say "... path="+re.path+"\nfile name="+re.artifact;    
+            say "... the full name of the selected folder is "+re.fullname;    
+            say "... isDir ? = "+re.isDir;    
+        }
+        else
+        {
+            say "... no choice was made so folder will be "+re.path+" and name="+re.fullname;
+    }
+    
+        confirm();
+        say "... IO() home folder of ${home} plus absolute folder of ${folder}  gives target folder of |${fn}|"
+*/    
+
+    /**
+     * Initialize this class with the function key
+     */
+    public boolean setup(String functionkey)
+    {
+        say "--- IO.setup() for key ${functionkey}"
+        setFunctionKey(functionkey)
+        String filename = getFileName(functionkey);
+
+        //chkobj();
+        present = read(); 
+
+        say "... IO.setup() of |${functionkey}| gives filename of |${filename}|";
+        say "... IO.setup() home folder of ${home} plus absolute folder of ${folder}  gives target folder of |${fn}|"
+        say "... IO.setup(String |${functionkey}|) gives filename of |${filename}|; does it currently exist? "+present;
+        return present;
+    } // end of method
+
+
+--- getFilename() logic
+        //functionkey = functionkey.trim();
+        //def i = functionkey.lastIndexOf('.');
+        //String key = (i<0) ? functionkey : functionkey.substring(0, functionkey.length() - (i+1)) ;
+        //key = key.trim();
+
+        // true when value is a choice in the range of F1..F24
+        //boolean yn = valid(key);
+    //if (!yn)  { throw new Exception("... failed to IO.getFileName for |${functionkey}|");}    
+
+    // make input text value into a filename for text files
+        //if ( i < 0 && functionkey.length() > 0 ) { functionkey += ".txt"; }
+
+-----------------------
+IO.groovy main code ---
+        // try without file .txt suffix
+        println ""
+        println "\n---------------- F13  -----------------------------"
+        fn = "F13";
+        ck = new IO(fn,true);
+        tx = ck.getPayload();
+        if (tx.size() > 0) { println "... found <${fn}> file ? :\n    payload has "+tx.size()+" bytes"; }
+        if (tx.size() < 1) { println "    - no payload found for |${fn}|"}
+
+        println ""
+        println "\n---------------- F14  -----------------------------"
+        fn = "F14";
+        ck = new IO(fn,true);
+        tx = ck.getPayload();
+        println "... found <${fn}> file ? "
+        println "... payload has "+tx.size()+" bytes";
+        if (tx.size() < 1) { println "... no payload found for <${fn}>"}
+
+        println ""
+        tx = ck.getToolTip();
+        println "... found <${fn}> tooltip file ? "
+        println "... payload has "+tx.size()+" bytes";
+        if (tx.size() < 1) { println "    - no tooltips found for <${fn}>"}
+
+        println ""
+        println "\n---------------- F18  -----------------------------"
+        fn = "F18";
+        ck = new IO(fn,true);
+        boolean ok = ck.write("|F18 tooltip goes here|The payload for F18 is this.");
+        println "... did we write tooltip to <${fn}> file ok ? :"+ok;
+
+        println ""
+        println "\n---------------- F19  -----------------------------"
+        fn = "F19";
+        ck = new IO(fn,true);
+        ok = ck.delete();
+        if (ok){ println "... deleted F19.txt"; }
+        if (!ok){ println "... did not delete F19 file "+ck.filename; }
+        ok = ck.write("");
+        println "... did we write tooltip to <${ck.filename}> file ok ? :"+ok;
+        tx = ck.getToolTip();
+        if (tx.size() < 1) { println "    - no tooltips found for <${fn}>"}
+        tx = ck.getPayload();
+        if (tx.size() < 1) { println "    - no payload found for <${fn}>"}
+
+
+        println "\n---------------- F20  -----------------------------"
+        ck = new IO("F20",true);
+        ck.getFileName();
+        boolean ok2 = ck.delete();
+        if (ok2){ println "... deleted F20"; }
+        
+        ok2 = ck.write(null);
+        println "... did we write tooltip to F20 file ok ? :"+ok2;
+
+        tx = ck.getToolTip();
+        if (tx.size() < 1) { println "    - no tooltips found for F20"}
+        if (tx.size() > 0) { println "    - tooltip found for F20 has "+tx.size()+" bytes"}
+        
+        tx = ck.getPayload();
+        if (tx.size() < 1) { println "    - no payload found for F20"}
+        if (tx.size() > 0) { println "    - payload found for F20 has "+tx.size()+" bytes"}
+
+        println "-------------------------------------------------"
+        ok2 = ck.valid("F2");
+        println "... is this F2 value a valid text value for this module ? :"+ok2;
+
+        println "-------------------------------------------------"
+        try{ ok2 = ck.valid("F2.adoc"); } catch(Exception x) { println "... F2.adoc failed";};
+        println "... is this F2.adoc value a valid text value for this module ? :"+ok2;
+
+        println "-------------------------------------------------"
+        try{ ok2 = ck.valid("F26"); } catch(Exception x) { println "... F26 failed";};
+        println "... is this F26 value a valid text value for this module ? :"+ok2;
+
+        println "\n---------------- typical logic flow  -----------------------------"
+        IO io = new IO("F12",true);
+        println "... is this unset value a valid text value for this module ? :"+ok2;
+        println "... is any function set at start of this class invoke ? "+io.exists();
+        String ss = "";
+        println "... is any 'blank' filename known for this function value set at start of class ? "+io.chkobj();
+
+------------------
+IO.read(key) logic ---
+/*
+        boolean good = pf.hasFunctionKeyFileName(functionkey);
+        String filename = pf.getFunctionKeyFileName(functionkey);
+        
+        try{
+          payload =  new File(filename).getText('UTF-8');
+          say "... IO.read() found <${filename}> file with ${payload.size()} byte payload";
+          good = true;
+          // strips tooltip from payload if any & populates tooltip variable
+          payload = findToolTip(); 
+        } // end of if
+        catch(Exception e)
+        {
+            say "... IO.read(${key}) found exception reading <${filename}> :" + e.toString();
+            good = false;
+        } // end of else
+
+        say "--- IO.read() returned="+good;
+
+        return good;
+*/
+
+didn't work well, so rebuilt it. this is the old logic
+    /**
+     * Method to find String of tooltip text from the text payload of a .txt file
+     *
+     * @param  String text payload for this function key that may have tooltip text prefix within || delimiters
+     * @return String content of payload from file after tooltip is extracted, if it exists, else blank tooltip
+    private String findToolTip() 
+    {
+        if (payload==null || payload.size() < 1 )
+        {
+            tooltip = "";
+            return "";
+        } // end of if
+
+        // assume it's all tool tip text
+        String tt = payload.trim();
+
+        boolean ok = (tt.startsWith("|"));
+        def ix = tt.indexOf('|') 
+
+        if (ok && ix > -1)
+        {
+            tt = tt.substring(1);
+            ix = tt.indexOf('|') 
+            tt = payload.trim().substring(1, ix+1);
+            //payload = payload.substring(ix+2)
+            say "... IO.findToolTip() tt=<${tt}>";
+        } // end of if
+        else
+        {
+            tt = "";
+        }
+
+        tooltip = tt;
+        return tooltip.trim();
+    } // end of method
+     */
+
+

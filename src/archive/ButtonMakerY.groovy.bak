@@ -1,0 +1,205 @@
+package io.jnorthr.toolkit;
+
+import io.jnorthr.toolkit.F5Data;
+import io.jnorthr.toolkit.F5GUI;
+import io.jnorthr.toolkit.Copier;
+import io.jnorthr.toolkit.IO;
+import io.jnorthr.toolkit.Mapper;
+
+import javax.swing.JButton;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.Color;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.*;
+
+
+public class ButtonMaker
+{
+    F5Data f5data = new F5Data();
+
+	/** a button to stop this app - usually tied to the ESC key on a keyboard*/
+	JButton quitbutton = new JButton("Quit");
+
+	/** a button to do a full screen print as a .png to output file in current user's folder by some key on a keyboard*/
+	JButton printbutton = new JButton("Print");
+
+	JButton leftbutton = new JButton("Left");
+
+    /** a hook to use of the <- left arrow key */
+	KeyStroke leftKeyStrokeHit = KeyStroke.getKeyStroke("LEFT")
+
+    /** a hook to use of the Escape key */
+	KeyStroke escKeyStrokeHit = KeyStroke.getKeyStroke("ESCAPE");
+
+    /** a hook to use of the Print Screen key */
+	KeyStroke printKeyStrokeHit = KeyStroke.getKeyStroke("PRINTSCREEN");
+	
+
+	F5GUI f5gui = new F5GUI();
+
+	/**
+    * Default constructor to build a JButton instance
+    */
+	public ButtonMaker(F5Data f5d)
+	{
+		f5data = f5d;
+		quitbutton = makeQuitButton();
+		printbutton = makePrintButton();
+		//leftbutton = makeLeftButton();
+	} // end of constructor
+
+	public JButton makeButton(String key)
+	{
+		JButton mybutton = new JButton(key);
+	} // end of makeButton
+
+    public JButton makeQuitButton()
+    {
+		Action quitAction = new AbstractAction("ESC") {
+			@Override
+			public void actionPerformed(ActionEvent evt) {
+				say "\nQuit quitAction run when ESCAPE function key WAS pressed ...";
+				System.exit(0);
+			} // end of ActionPerformed
+		}; // end of quitAction
+
+
+		quitbutton.addMouseListener(new MouseAdapter()
+		{
+			public void mouseEntered(MouseEvent mEvt)
+            {
+				quitbutton.setToolTipText( f5data.tooltips["ESC"] );
+				//f5gui.title = f5data.tooltips["ESC"];
+    		}
+		});
+
+
+		quitbutton.setFont(new Font("Arial", Font.BOLD, 8));
+		quitbutton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escKeyStrokeHit, "Quit");
+		quitbutton.getActionMap().put("Quit", quitAction);
+		quitbutton.setAction(quitAction); // when button mouse clicked
+		quitAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_ESCAPE);  //KeyEvent.VK_LEFT
+
+		return quitbutton;
+	} // end of makeQuitButton
+
+    public JButton makePrintButton()
+    {
+    	ImageIcon printer = new ImageIcon("images/CROSS.png");
+        Action printAction = new PrintAction("PRINT", printer, "Screen Print", new Integer(KeyEvent.VK_UP))
+		printbutton.addMouseListener(new MouseAdapter()
+		{
+			public void mouseEntered(MouseEvent mEvt)
+            {
+				printbutton.setToolTipText( f5data.tooltips["PRINT"] );
+				f5gui.title = f5data.tooltips["PRINT"];
+    		}
+		});
+
+
+		printbutton.setFont(new Font("Arial", Font.BOLD, 8));
+		printbutton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(printKeyStrokeHit, "PRINT");
+		printbutton.getActionMap().put("Quit", printAction);
+		printbutton.setAction(printAction); // when button mouse clicked
+		printAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_UP);  //KeyEvent.VK_LEFT
+
+		return printbutton;
+	} // end of makePrintButton
+
+/*
+    public JButton makeLeftButton()
+    {
+		Action leftAction = new AbstractAction("LEFT") {
+			@Override
+			public void actionPerformed( ActionEvent evt )
+			{
+				say "\nMove leftAction run when LEFT function keys WAS pressed ...";
+    			f5gui.ok = !f5gui.ok;
+
+    			if (f5gui.ok)
+    			{
+	   				say "... vertical layout: "
+    				f5gui.setLayout(f5gui.V);
+    				f5gui.setSize(60, 760); 
+    				f5gui.setPreferredSize(new Dimension(60, 760)); // 60px wide & 760px tall
+					f5gui.windowSize = f5gui.getSize(); // remember preferred dimension
+
+	    			f5gui.right = !f5gui.right; 
+	    			if (f5gui.right)
+   					{
+    					leftbutton.setText("=>");
+						icon7 = new ImageIcon("images/CROSS.png");
+    					leftbutton.setIcon(icon7);
+    					leftbutton.setBackground(Color.BLACK);
+						leftbutton.setForeground(Color.BLACK);
+    					leftbutton.setOpaque(true);
+   						leftbutton.setContentAreaFilled(true);
+   					} // end of if
+
+    				int j = (f5gui.right) ? 0 : f5gui.screenSize.width - (f5gui.windowSize.width + 56);
+					int thisWindowY = Math.max(0, ((f5gui.screenSize.height - f5gui.windowSize.height) / 2) );
+    				f5gui.setLocation(j, thisWindowY);
+    				say "setLocation(${j}, ${thisWindowY}) "
+    			} // end of if
+
+    			if (!f5gui.ok)
+   				{
+    				f5gui.setLayout(f5gui.H);
+    				f5gui.setSize(760, 80); // 760px wide & 80px tall window panel
+					f5gui.setPreferredSize(new Dimension(760, 80)); // make it so ....
+					f5gui.windowSize = f5gui.getSize();  // ask java vm for dimensions
+					int windowX = Math.max(0, (f5gui.screenSize.width  - f5gui.windowSize.width ) / 2); // divide by 2 to center between left&right edge of hardware
+					int windowY = Math.max(0, (f5gui.screenSize.height - f5gui.windowSize.height))  - 80; // this puts our window 80px from hardware screen bottom
+   					f5gui.setLocation(windowX, windowY); // this does it
+   					say "... horizontal setLocation(${windowX}, ${windowY}) "
+   				} // end of if
+
+	    		f5gui.validate(); // tell jvm to do changes
+
+			} // end of ActionPerformed
+	}; // end of leftAction
+*/
+
+	public static void main(String[] args)
+	{
+		println " "
+		println "ButtonMaker starting"
+		// setup empty Map
+		Map myPayload = ["F12":true]
+		Map tools = ["F12":"this is tooltip for F12"]
+
+		//F5GUI f5gui = new F5GUI();
+		println "ButtonMaker making F5Data"
+		F5Data f5data = new F5Data();
+		println "ButtonMaker ended making F5Data"
+
+		println "... new constructor ButtonMaker(f5data)="+f5data;
+		def bm = new ButtonMaker(f5data);
+		assert bm != null;
+		println "... ButtonMaker made."
+
+		println "... makeButton F12"
+		JButton b = bm.makeButton("F12");
+		println "... bm.makeButton(F12) method gave JButton=" + b.toString();
+
+		println "... makeLeftButton Left"
+		//JButton lb = bm.makeLeftButton();
+		//println "... bm.makeLeftButton() method gave JButton=" + b.toString();
+
+		println "--- the end of ButtonMaker ---";
+	} // end of main
+}

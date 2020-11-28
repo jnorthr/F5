@@ -1,0 +1,17 @@
+
+package io.jnorthr.toolkit;
+
+import java.awt.*
+import javax.imageio.ImageIO
+
+public void screenPrint()
+{
+    def fn = System.getProperty("output.file");
+    if (fn==null) { fn = "/Users/jim/copybooks/screenprint.png" }
+    def size = Toolkit.getDefaultToolkit().getScreenSize();
+    java.awt.Rectangle pic = new Rectangle(size);
+    ImageIO.write(new Robot().createScreenCapture(pic),"png", new File(fn));
+} // end
+
+//screenPrint();
+//println "--- the end ---"

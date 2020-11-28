@@ -1,0 +1,60 @@
+start "" /B  /D "./F5/bin"  F5.bat
+the above command run from a terminal with cd directory C:\Users\Owner\Dropbox\Projects\F5\F5\bin\F5.bat
+
+this command when entered into a terminal, will execute F5 but /copybooks folder or .F5.txt may not be found :
+C:\Users\Owner\Dropbox\Projects\F5\F5\bin\F5.bat
+
+1. validate function key field for valid F1..F24
+2. mouse click won't work
+3. scrollpad buttons do not work
+4. no .F5.txt - ask for a starting folder for copybooks
+5. no /copybooks folder ? what to do ?
+6. copy images to clipboard, like screenprint - see: http://alvinalexander.com/java/java-copy-image-to-clipboard-example/
+7. change mapper to use |{} replacements rather than ${} like groovy - forget this, too much trouble
+8. backslash \${}  pair remain when copied to clipboard but still asks for value even when \
+9. if no .png image for function key, box is too tiny & missing any text
+10. Some buttons also show text beside the functionkey image - why ?
+11. gradle needs to copy images, copybooks folder and .F5.txt files into target distribution
+12. the \ key does not move panel in Ubuntu
+13. ubuntu desktop shortcut to F5
+14. bash script to run F5
+15. ADD button on editor opens function key field but does not allow entry of F value
+16. \ to either side does not stack buttons vertically
+17. Saving new text for a black button w/o .txt file does not make it green again
+18. see Dropbox answer about how to see if Dropbox can be used
+19. remove all validate key text for valid F1..F12 - just have thempress the key they want
+20. use 12 JRadioButtons on templates dialog to visually confirm which key is being set 
+21. put keypress confirm into GUI heading
+22. mouseClicked for screenprint in buttonMaker throws up on failed
+
+ButtonMaker Chooser=no	IO=no	F5Data but no system.user
+ChooseCopybooksFolder
+Chooser		Chooser=Yes	IO=no but reads .F5.txt & System.getProperty("user.home") but no F5Data
+Copier		Chooser=no 	IO=no 	no F5Data & no user.home
+F5			Chooser=no	IO=Yes  F5Data=yes
+F5Data		Chooser=no 	IO=no	PathFinder=yes
+F5GUI		Chooser=no 	IO=no	F5Data=no
+IO			Chooser=yes IO=yes  System.getProperty("user.home")+fs; but no F5Data
+Mapper		Chooser=no 	IO=no	F5Data=no & no user.home
+MenuAccessibility
+PathFinder	Chooser=no 	IO=no	feeds F5Data
+PositionLogic
+Response	Chooser=no 	IO=no	no F5data & no user.home
+Sample		Chooser=no 	IO=no	no F5data & no user.home -- missing now
+TemplateGUI
+TemplateMakerChooser=yes IO=no	no F5data & no user.home
+URL			Chooser=no 	IO=no	no F5data & yes user.home + 'copybooks' <-- Missing now
+
+== Actions Folder Logic
+ClearAction
+CopyAction - skeleton
+CutAction - skeleton
+EditAction
+ExitAction - maybe something
+FromClipboardAction - Feature to create an Action to copy System Clipboard content into the text file that belongs to this function key
+PasteAction - skeleton
+PrintAction - Feature to do a full screen print as an Action
+QuitAction - Feature to create an Action to dispose of the current JOptionPane dialog
+ToClipboardAction - yes, does it
+
+

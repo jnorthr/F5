@@ -1,0 +1,1 @@
+|Asciidoctor Template|Text payload for the F2 function key.
