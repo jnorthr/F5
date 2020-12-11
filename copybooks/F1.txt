@@ -1,5 +1,2 @@
 |Asciidoctor Template|Text payload for
-the F1 function key \${abbrev}.\${name}.
-
-My home is \${address}
-and my original name was ${name}
+the F1 function key ${abbrev}.${name}.

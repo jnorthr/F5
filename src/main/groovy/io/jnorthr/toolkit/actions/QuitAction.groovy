@@ -25,8 +25,7 @@ public class QuitAction extends AbstractAction
   }
 
   public void actionPerformed(ActionEvent e)
-  { 
-	//println "... QuitAction clicked";
+  { //println "... QuitAction clicked";
     f.dispose();
   }
 

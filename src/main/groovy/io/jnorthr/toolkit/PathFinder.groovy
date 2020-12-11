@@ -8,8 +8,8 @@ import java.io.IOException;
 
 /**
 * This program implements a support application that gains system & user values for directory and folder names,
-* confirms the existance of an optional text file  .F5.txt, and if that exists and has a text value that is also a valid
-* system directory folder name with the name of a valid 'copybooks' folder, then copyPathFound boolean becomes true
+* confirms the exists of an optional text file, and if that exists nad has a text value that is also a valid
+* system directory foler name, then copyPathFound boolean becomes true
 *
 * Use annotation to inject log field into the class.
 *
@@ -22,22 +22,38 @@ public class PathFinder
     /** an O/S specific char. as a file path divider */
     String fs = java.io.File.separator;
 
-    ChooseCopybooksFolder ccf = new ChooseCopybooksFolder();
-    
     /**
-     * This name points to current platform-independent folder path location the user is now working in, i.e. user.dir
+     * This name points to current platform-independent folder path location the user is now working in.  
      */
-    String currentDirectory = ccf.currentUsersWorkDir;
+    String currentDirectory  = System.getProperty("user.dir") + File.separator;
+
+    /** an O/S specific location for the user's home folder name plus a trailing file separator*/ 
+    String home = System.getProperty("user.home") + fs;
 
     /**
-     * This name points to platform-independent folder path location of the user's core folder, i.e. user.home  
+     * This name points to platform-independent folder path location of the user's core folder.  
      */
-    String homePath = ccf.currentUsersHomeDir;
+    String homePath  = System.getProperty("user.home") + fs;
 
-    // set true if copybook directory found in currentDirectory
-    boolean useCurrent = ccf.workCopybooks;
-    boolean useHome = ccf.homeCopybooks;
+
+    /** an O/S specific location for the user's home folder name plus a trailing file separator and 
+     * name of file holding currentFolderDirectory location, i.e. the metadata filename
+     */ 
+    String metafile = home+".F5.txt";
+
+    // alternative location for .F5.txt
+    String metafile2 = currentDirectory+".F5.txt";
+
+    // set true if the .F5.txt or copybook directory found in currentDirectory
+    boolean useCurrent = false;
     
+    // this may become true after we confirm the .F5.txt metadata file really exists 
+    boolean metaFound = false;
+
+
+    // this may become true after we confirm the folder/directory named in the metadata file
+    // really exists
+    boolean copyPathFound = false;
 
     /** an O/S specific location for the user's home folder name plus a trailing file separator
      * plus the 'copybook' group folder name - something like /Users/jim/copybooks which holds a
@@ -57,8 +73,57 @@ public class PathFinder
     */
     public PathFinder()
     {
-        copyPathDirectory = ccf.getFolderName();
+        home     = home.collectReplacements(replacement);
+        homePath = homePath.collectReplacements(replacement);
+        currentDirectory = currentDirectory.collectReplacements(replacement);
+
+        metaFound = new File(metafile).exists();
+	    say "--- PathFinder() now looking for ${metafile} found ? "+metaFound;
+
+        // if .F5.txt not in 'home' try currentDirectory
+        if (!metaFound)
+        {
+        	metafile = metafile2;
+        	useCurrent = true;
+	        metaFound = new File(metafile).exists();
+	        say "--- PathFinder() now looking for ${metafile} 2 found ? "+metaFound;
+        } // end of if
+
+        if (metaFound)
+        {
+            def file4 = new File(metafile);
+            copyPathDirectory = file4.getText('UTF-8').trim();
+            copyPathFound = new File(copyPathDirectory).exists();  
+            say "... metaFound but copyPathFound="+copyPathFound+" for "+copyPathDirectory;
+            if (!copyPathFound)
+            {
+                // check if discovered file is really a folder directory, if so copybooFound becomes true;
+                copyPathFound = new File(copyPathDirectory).isDirectory();
+	            say "... !copyPathFound but now copyPathFound="+copyPathFound+" for "+copyPathDirectory;
+            } // end of if
+        } // end of if
+        else
+        {
+        	say "!metaFound:"
+            copyPathDirectory = currentDirectory+"copybooks"+fs;
+            copyPathFound = new File(copyPathDirectory).isDirectory();
+        	boolean ok = write(copyPathDirectory);
+        	metaFound = ok;
+        } // end of else        
+
+        // no copybooks folder found so make one
+		if (!copyPathFound)
+		{
+			Path path = Paths.get(copyPathDirectory);
+
+			//java.nio.file.Files;
+			Files.createDirectories(path);
+            copyPathFound = new File(copyPathDirectory).isDirectory();
+            say "... PathFinder making copybook folder named:"+copyPathDirectory+" ok="+copyPathFound;
+		} // end of if
+
     } // end of constructor
+
 
     /**
      * A method to print an audit log if audit flag is true
@@ -80,6 +145,13 @@ public class PathFinder
         return currentDirectory;
     } // end of method
 
+   /** 
+    * Provides the calling logic with a platform-independent pointer to the folder the present user owns
+    */
+    public String getHome()
+    {
+        return home;
+    } // end of method
 
    /** 
     * Provides the calling logic with a platform-independent pointer to the folder the present user owns
@@ -89,6 +161,31 @@ public class PathFinder
         return homePath;
     } // end of method
 
+   /** 
+    * Provides the calling logic with a platform-independent pointer to the file holding the metadata file name
+    * like /Users/jim/.F5.txt or C:/Users/Owner/Dropbox/Projects/F5/.F5.txt|
+    */
+    public String getMetaFile()
+    {
+        return metafile;
+    } // end of method
+
+
+   /** 
+    * Provides the calling logic with a platform-independent pointer to the file holding the metadata file name
+    * like /Users/jim/.F5.txt if it exists else false if it is missing,mis-named,etc
+    */
+    public String hasMetaFile()
+    {
+        return metaFound;
+    } // end of method
+
+
+    // tells whether copybook folder was found with payloads; true=found;
+    public boolean hasCopybook()
+    {
+        return copyPathFound;
+    }
 
    /** 
     * Provides the calling logic with a platform-independent pointer to the copybook folder the user has for his
@@ -97,6 +194,69 @@ public class PathFinder
     public String getCopyPathDirectory()
     {
         return copyPathDirectory;
+    } // end of method
+    
+   /** 
+    * Produce platform-specific file system names
+    * replace windows \ values in homePath with /
+    */
+    def replacement = 
+    {
+          // Change \\ to /
+         if (it == '\\') 
+         {
+            '/'
+         }
+         // Do not transform
+         else {
+            null
+         }
+       } // end of replacement
+
+
+    /**
+     * Method to write String of text to F5 metadata file; this method will use our own home folder name + file name of .F5.txt
+     *
+     * @param  String of text to write to file
+     * @return true, if write was successful
+     */
+    public boolean write(String payload) 
+    {
+        say "--- write(${payload}) into file named "+metafile;
+    
+        def file3 = new File(metafile);
+        boolean present = file3.exists();
+
+        try
+        {
+            if (payload==null) { payload=""; }
+            
+            file3.withWriter('UTF-8') { writer ->
+                writer.write(payload.trim())
+            } // end of withWriter
+
+            metaFound = true;
+
+            copyPathDirectory = payload.trim();
+            copyPathFound = new File(copyPathDirectory).exists();  
+            if (copyPathFound)
+            {
+                // check if discovered filename is really a folder directory, if so copybooFound becomes true;
+                copyPathFound = new File(copyPathDirectory).isDirectory();
+            } // end of if
+
+        } // end of try
+        
+        catch(IOException x)
+        {
+            say "...  write method failed to write <${metafile}> due to:"+x.message;
+            metaFound = false;
+            copyPathFound = false;
+            copyPathDirectory = homepath;
+            if (useCurrent) { copyPathDirectory = currentDirectory; }
+        }
+
+        return metaFound;
     } // end of method
     
 
@@ -112,7 +272,7 @@ public class PathFinder
         int dots = keyname.count(".");
         int slash = keyname.count(fs);    
     
-        String name = copyPathDirectory; 
+        String name = copyPathDirectory; // + fs;
         
         // if no folder or directory path included, add known copybook path
         if (slash < 1) 
@@ -141,11 +301,8 @@ public class PathFinder
             }        
         } // end of else
 
-        say "... getFunctionKeyFileName(${key})=|"+keyname+"|";
-
         return keyname;
     } // end of method
-
 
     // confirms if a file present in this file system with full path & function key name and .txt
     public boolean hasFunctionKeyFileName(String key)
@@ -153,7 +310,6 @@ public class PathFinder
         def has = false;
         def x = getFunctionKeyFileName(key);
         has = new File(x).exists();
-        say "... hasFunctionKeyFileName(${key})="+has+" for file named:"+x;
         return has;
     } // end of method
 
@@ -161,18 +317,27 @@ public class PathFinder
     /*
      * Logic to reveal internal values
      */
-    public void dump()
+    public void show()
     {
-		println "\nPathFinder.dump() --------------";
-        println "... currentDirectory     ="+getCurrentDirectory();
-        println "... user.home (homePath) ="+getHomePath();
-        println "... copyPathDirectory    ="+getCopyPathDirectory();        
-        println "... fs                   =|"+fs+"|";
-        println "... currentDirectory     =|"+currentDirectory+"|";
-        println "... homePath             =|"+homePath+"|";
-        println "... copyPathDirectory    =|"+copyPathDirectory+"|";    	
-        println "... useCurrent           =|"+useCurrent+"|";
-    } // end of dump
+        println "currentDirectory       ="+getCurrentDirectory();
+        println "user.home (home)       ="+getHome();
+        println "user.home (homePath)   ="+getHomePath();
+        println "metafile               ="+getMetaFile();
+        println "metaFound              ="+hasMetaFile();
+        println "copyPathFound          ="+hasCopybook();
+        println "copyPathDirectory      ="+getCopyPathDirectory();
+        println "-------------------"
+        
+        println "fs                     =|"+fs+"|";
+        println "currentDirectory       =|"+currentDirectory+"|";
+        println "home                   =|"+home+"|";
+        println "homePath               =|"+homePath+"|";
+        println "metafile               =|"+metafile+"|";
+        println "metaFound              =|"+metaFound+"|";
+        println "copyPathFound          =|"+copyPathFound+"|";
+        println "copyPathDirectory      =|"+copyPathDirectory+"|";    	
+        println "useCurrent             =|"+useCurrent+"|";
+    }
 
 
     // =============================================================================    
@@ -188,8 +353,11 @@ public class PathFinder
         PathFinder pf;
         
         pf = new PathFinder();
-        pf.dump();
+        pf.show();
         pf.audit = true;
+        //println "\n  \nwrite new value into .F5.txt "
+        //pf.write("/Users/jim/Dropbox");
+        //pf.show();
 
         println "hasFunctionKeyFileName(F1)      = "+pf.hasFunctionKeyFileName("F1");
         println "getFunctionKeyFileName(F1)      = "+pf.getFunctionKeyFileName("F1");
@@ -205,22 +373,28 @@ public class PathFinder
 
         println "getFunctionKeyFileName(/Users/jim/copybooks/F12.txt)     = "+pf.getFunctionKeyFileName("/Users/jim/copybooks/F12.txt");
         println "hasFunctionKeyFileName(/Users/jim/copybooks/F12.txt)     = "+pf.hasFunctionKeyFileName("/Users/jim/copybooks/F12.txt");
-        def name =pf.getCopyPathDirectory();
-       	name += "F1";
 
-        println "pf.hasCopybook so name ="+name;
-	    println "hasFunctionKeyFileName(${name}) = "+pf.hasFunctionKeyFileName(name);
-	    println "getFunctionKeyFileName(${name}) = "+pf.getFunctionKeyFileName(name);
+        if (pf.hasCopybook())
+        {
+        	def name =pf.getCopyPathDirectory();
+        	//name += pf.fs;
+        	name += "F1";
 
-        name += "9";
-	    println "hasFunctionKeyFileName(${name}) = "+pf.hasFunctionKeyFileName(name);
-	    println "getFunctionKeyFileName(${name}) = "+pf.getFunctionKeyFileName(name);
+        	println "pf.hasCopybook so name ="+name;
+	        println "hasFunctionKeyFileName(${name}) = "+pf.hasFunctionKeyFileName(name);
+	        println "getFunctionKeyFileName(${name}) = "+pf.getFunctionKeyFileName(name);
 
-        name += "X";
-	    println "hasFunctionKeyFileName(${name}) = "+pf.hasFunctionKeyFileName(name);
-	    println "getFunctionKeyFileName(${name}) = "+pf.getFunctionKeyFileName(name);
+        	name += "9";
+	        println "hasFunctionKeyFileName(${name}) = "+pf.hasFunctionKeyFileName(name);
+	        println "getFunctionKeyFileName(${name}) = "+pf.getFunctionKeyFileName(name);
 
-        pf.dump();
+        	name += "X";
+	        println "hasFunctionKeyFileName(${name}) = "+pf.hasFunctionKeyFileName(name);
+	        println "getFunctionKeyFileName(${name}) = "+pf.getFunctionKeyFileName(name);
+
+        } // end of if
+
+        pf.show();
 
         println "\n---------------\n--- the end ---"
         //System.exit(0);

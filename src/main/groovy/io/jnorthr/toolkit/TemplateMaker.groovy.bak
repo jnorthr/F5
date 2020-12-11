@@ -1,0 +1,346 @@
+
+
+    /**
+     * Non-Default constructor builds a tool to build new file or overlay existing payload text plus title for this function key and save or rewrite in a file
+     *
+     * @param  fn String of text declaring which key this run is for like F7 
+     * @param  data String of text declaring clipboard payload for this key  
+     * @return a tool to manage payload text for function key 'fn' and save in a file
+     */
+    public TemplateMaker(String fn, String data)
+    {
+		fn = stripper(fn);
+		String g = "F5 -> Edit the payload for this ${fn} key";
+		say g;
+        f.setTitle(g); 
+        exitOnClose = false;
+        functionField.setText(fn);
+        say "... 129 fn=|${fn.trim()}| functionField=|${functionField.getText()}|"
+
+        boolean yn = (fn < "F0" || fn > "F24") || fn.size() > 3;
+        if (yn)
+        {
+            say "... TemplateMaker can not setup(${fn}) as function key |${fn.trim()}| invalid"
+            functionField.setText(""); // reset default
+            say "... 136 fn=|${fn}| functionField=|${functionField.getText()}| not in range"
+			throw new Exception("|${fn}| is too badly formed, not a function key.");
+        }
+        else
+        {
+			say "... writing fn=|${fn}| data="+data;
+            payload = data;
+            setup(fn);
+            io.reset(fn);
+            
+            String fi = fn.trim();
+            String tx = "";
+
+            // automatic put payload on clipboard when saving; note tooltip text is a diff.gui field
+            Copier co = new Copier();
+            co.paste(data);
+			
+            boolean ok = io.read(fi)
+            fi = io.copybookFilename;
+			
+			say "... io says copybookFilename=|"+fi+"|";
+            tx = io.write(data, fi ); // over-write any prior version
+			
+            say "... TemplateMaker write constructor wrote ${fi} file with ${payload.size()} bytes; result was ${tx}";            
+        } // end of else
+    } // end of constructor
+
+
+
+	
+    /**
+     * A method to capture tooltip and payload for one single function key
+     *
+     * @param  key String of text declaring which function key this run is for like F7 
+     * @return boolean is true if setup was successful
+     */
+    private boolean setup(String key)
+    {
+        boolean editor = (key == null) ? true : false;
+        if (editor) { key = "F0"; }
+        say "... TemplateMaker doing setup(${key})";
+
+		def tx = stripper(key);
+        jp2.add(new JLabel("Function key :"));
+        
+		functionField.setText(tx);
+        say "... 237 key=|${tx}| functionField=|${functionField.getText()}|"
+
+        functionField.setEditable(editor); 
+        jp2.add(functionField);
+
+        jp2.add(new JLabel("Tooltip Title :"));
+
+        // ask for prior tooltip from .txt file, if any
+	    io.setFunctionKey(tx);
+        String tt = io.getToolTip(tx);
+        say "... setup getting key |${tx}| tooltip of |"+tt+"|";
+    
+        tooltip.setText(tt); 
+        jp2.add(tooltip);
+        tooltip.setEditable(!editor); 
+
+	    f.addWindowListener( new WindowAdapter() 
+        {
+    	   public void windowOpened( WindowEvent e )
+    	   {
+                if (editor)
+                {
+                    functionField.requestFocus(); // gui sets initial focus on function key text field
+                } 
+                else
+                {
+                    tooltip.requestFocus(); // gui sets initial focus on tooltip text field
+                }
+    	   } // end of windowOpened
+	    }); // end of Listener
+
+        // gui top for function key plus tooltip input
+        f.add(jp2, BorderLayout.NORTH);
+        jp.setLayout(new GridLayout(4,1)); // 4 rows one column
+
+        // payload text entry field
+        area.setBounds(10,20, 240,200);  
+        area.setLineWrap(true);
+        Font font = new Font("Courier", Font.BOLD, 12);
+        area.setFont(font);
+        payload = io.getPayload();
+        area.setText(payload);
+        area.setEditable(!editor); 
+
+        f.add(new JScrollPane(area), BorderLayout.CENTER);
+        font = new Font("Arial", Font.BOLD, 14);
+
+        // Clear button b1 erases tooltip and payload areas
+        b1.setFont(font);
+        b1.addActionListener(this);
+        b1.setToolTipText( "Remove text in this panel" );
+        b1.setOpaque(true);
+    	b1.setBackground(Color.YELLOW);
+    	b1.setForeground(Color.BLUE);
+        b1.setMnemonic(KeyEvent.VK_C);
+        icon7 = new ImageIcon("images/CLS.png");
+        b1.setIcon(icon7);
+
+        // Erase key button forces GUI to clear data on screen
+        b1.addMouseListener(new MouseAdapter() 
+        {
+            public void mouseEntered(MouseEvent mEvt) 
+            {
+                b1.setToolTipText( "This key erases this text & clears panel data" );
+                f.setTitle("Clears data from fields of this panel")
+            }
+        });
+        
+
+        // Paste button b2 puts payload onto system clipboard
+        b2.addActionListener(this);
+        b2.setToolTipText( "Paste text (unchanged) onto System Clipboard" );
+        b2.setFont(font);
+        b2.setOpaque(true);
+	    b2.setBackground(Color.YELLOW);
+    	b2.setForeground(Color.BLUE);
+        icon7 = new ImageIcon("images/CROSS.png");
+        b2.setIcon(icon7);
+
+        // Paste key button forces GUI to copy data on screen to system clipboard
+        b2.addMouseListener(new MouseAdapter() 
+        {
+            public void mouseEntered(MouseEvent mEvt) 
+            {
+                b2.setToolTipText( "This key will copy this text to system clipboard" );
+                f.setTitle("This key will copy this text to system clipboard")
+            }
+        });
+        
+        // Save button is b3
+        b3.addActionListener(this);
+        b3.setToolTipText( "Save this text into ${key}.txt external file" );
+        b3.setFont(font);
+        b3.setOpaque(true);
+	    b3.setBackground(Color.YELLOW);
+    	b3.setForeground(Color.BLUE);
+        b3.setContentAreaFilled(true);
+        icon7 = new ImageIcon("images/SAVE.png");
+        b3.setIcon(icon7);
+
+        // SAVE key button forces GUI to save data on screen
+        b3.addMouseListener(new MouseAdapter() 
+        {
+            public void mouseEntered(MouseEvent mEvt) 
+            {
+                b3.setToolTipText( "This key will save text from this dialog" );
+                f.setTitle("This key will save text from this panel")
+            }
+        });
+
+        // Escape key button b4 forces GUI to quit
+        b4.addMouseListener(new MouseAdapter() 
+        {
+            public void mouseEntered(MouseEvent mEvt) 
+            {
+                b4.setToolTipText( "ESC key will quit this dialog" );
+                f.setTitle("ESC key will close this panel")
+            }
+        });
+
+        def quitAction = new QuitAction("ESC",new Integer(KeyEvent.VK_ESCAPE));
+        quitAction.setFrame(f);
+
+        b4.getActionMap().put("Quit", quitAction);
+        b4.setAction(quitAction); // when button mouse clicked
+        b4.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(stroke, "Quit");
+        b4.setFont(font);
+        b4.setText("Exit Key")
+        b4.setOpaque(true);
+	    b4.setBackground(Color.YELLOW);
+    	b4.setForeground(Color.BLUE);
+        icon7 = new ImageIcon("images/ESC.png");
+        b4.setIcon(icon7);
+
+        // add buttons to button panel at right of gui
+        jp.add(b1);
+        jp.add(b2);
+        jp.add(b3);
+        jp.add(b4);
+
+	    f.setBackground(Color.YELLOW);
+        f.add(jp,BorderLayout.EAST);  
+        f.setSize(700,300);  
+		f.pack();
+		f.setVisible(true);      
+
+/*
+		SwingUtilities.invokeAndWait(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				f.setVisible(true);      
+			}
+		}
+		);
+*/
+		return editor;
+    } // end of method    
+	
+
+
+
+
+
+
+
+    // =============================================================================    
+    /*
+     * The primary method to execute this class. Can be used to test and examine logic and performance issues. 
+     * 
+     * argument is a list of strings provided as command-line parameters. 
+     * 
+     * @param  args a list of possibly zero entries from the command line; first arg[0] if present, is
+     *         taken as a simple file name of a groovy script-structured configuration file;
+     */
+	public static void main(String[] args)
+	{	
+        println "TemplateMaker starting ..."
+
+        Date date = new Date();
+        println "----------------------------------- ";
+        println "... TemplateMaker F12 updating Test 1 ...";
+		try{
+			TemplateMaker f12 = new TemplateMaker();
+        } 
+		catch (Exception x) 
+		{
+            println "--- F12 failed :"+x.toString();  // should pass as F12 is not in allowable list of keys 
+		} // end of catch
+
+/*                    
+        println "\n----------------------------------- ";
+        println "\n... TemplateMaker F16 updating Test 2 ...";
+		try{
+            TemplateMaker f16 = new TemplateMaker("F16","this f16 text was updated by TemplateMaker\ntest one in main() method\non ${date}");                    
+        } 
+		catch (Exception x) 
+        {
+			println "--- failed :"+x.toString();  // should fail as F16 is not in allowable list of keys 
+		} // end of catch
+        println "... TemplateMaker F16 ending Test 2 ...";
+
+
+        // try default function key test 3 
+        println "\n----------------------------------- ";
+        println "... TemplateMaker() Test 3";
+        TemplateMaker tm = new TemplateMaker();                    
+        String s = tm.getChoice();
+        tm.functionField.setText(s); 
+        println "... user wants |${s}| and key=|${tm.functionField}|";
+        if (s!=null)
+        {
+			println "... doing tm.setup()";
+            tm.setup(s);    
+        } // end of if          
+
+        println "\n----------------------------------- ";
+		    
+        // try some stripper functions
+        println "... test 3 stripper: F12=|"+tm.stripper("F12")+"|";
+        println "... test 3 stripper: f12=|"+tm.stripper("f12")+"|";
+        println "... test 3 stripper: F12.txt=|"+tm.stripper("F12.txt")+"|";
+        println "... test 3 stripper: F12.adoc=|"+tm.stripper("F12.adoc")+"|";
+		//println "... test 3 stripper: fred/F12.txt=|"+tm.stripper("fred.F12.txt")+"|";
+
+        println "\n----------------------------------- ";
+        // try some maker functions
+        println "... test 3 maker: |F12|"+tm.maker("F12")+"|";
+        //println "... test 3 maker: |blank|="+tm.maker("")+"|";
+        println "... test 3 maker: |f12|="+tm.maker("f12")+"|";
+        println "... test 3 maker: |F12.txt|="+tm.maker("F12.txt")+"|";
+        println "... test 3 maker: |F12.adoc|="+tm.maker("F12.adoc")+"|";
+        //println "... test 3 maker: |fred\\F12.txt|="+tm.maker("fred\\F12.txt")+"|";
+
+        println "\n----------------------------------- ";
+        println "... TemplateMaker(F11) Test 4";
+        TemplateMaker f11 = new TemplateMaker("F11");
+        boolean ok = f11.paste("F11 file ${f11.functionField} pasted by TemplateMaker Test 4 on ${date}");
+		def x = (ok) ? "successful" : "failed" ;
+        println "... 4th Test said that on ${date} paste request was "+x;
+
+        println " ";
+        println "... TemplateMaker(F17) Test 5";
+        println "... TemplateMaker F17 update with bad function key 17 value - Test 5";
+
+        // this one should fail
+        try
+		{ 
+			TemplateMaker f17 = new TemplateMaker("F17 tooltip", "this f17 text was updated by TemplateMaker\ntest one in main() method");                    
+        } 
+        catch (Exception ex) 
+        {
+			println "--- failed :"+ex.toString();  // should fail as F17 is not in allowable list of keys 
+        } // end of catch  
+
+        println "\n... TemplateMaker F13 updating Test 6 ...";
+		try{
+            TemplateMaker f13 = new TemplateMaker("F13","|F13 Tooltip|This f13 text was updated by TemplateMaker\ntest six in main() method");                    
+        } 
+		catch (Exception x3) 
+		{
+            println "--- F13 failed :"+x3.toString();  // should pass as F13 is in allowable list of keys 
+		} // end of catch
+                    
+        println "\n----------------------------------- ";
+        println "... TemplateMaker(F21) Test 7";
+        TemplateMaker f21 = new TemplateMaker("F21");
+		
+        println "--- the end of TemplateMaker ---";
+
+		System.exit(0);
+*/
+		
+	} // end of main
+ } // end of class 

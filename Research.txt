@@ -26,6 +26,7 @@ C:\Users\Owner\Dropbox\Projects\F5\F5\bin\F5.bat
 20. use 12 JRadioButtons on templates dialog to visually confirm which key is being set 
 21. put keypress confirm into GUI heading
 22. mouseClicked for screenprint in buttonMaker throws up on failed
+23. apple cmd+Function key appears to copy sys.clip back to function key but no text confirm or re-write to .txt file for it
 
 ButtonMaker Chooser=no	IO=no	F5Data but no system.user
 ChooseCopybooksFolder

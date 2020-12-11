@@ -1,0 +1,2 @@
+|F11 tooltip goes here|Text for F11 function key to be copied to 
+system clipboard

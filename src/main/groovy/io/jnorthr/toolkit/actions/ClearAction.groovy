@@ -29,7 +29,7 @@ public class ClearAction extends AbstractAction
 	functionField.setText("");
 	tooltip.setText("");
 	area.setText("");
-	//println "--- ClearAction hit actionPerformed(ActionEvent ${e})"
+	println "--- ClearAction hit actionPerformed(ActionEvent ${e})"
   }
 
   public void setFrame(JFrame e)

@@ -16,8 +16,9 @@ repositories {
 dependencies {
     //compile files("/opt/jdk1.7.0_40/jre/lib/rt.jar") cant find where to get rt.jar !
 
-    compile "org.codehaus.groovy:groovy-all:2.5.13"
-    runtime "org.codehaus.groovy:groovy-all:2.5.13"
+    compile "org.codehaus.groovy:groovy-all:3.0.4"
+
+    runtime "org.codehaus.groovy:groovy-all:3.0.4"
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the
@@ -26,7 +27,7 @@ dependencies {
     testCompile 'junit:junit:4.13'
 
     // Spock Framework basic dependencies:
-    testCompile "org.codehaus.groovy:groovy-all:2.5.13"
+    testCompile "org.codehaus.groovy:groovy-all:3.0.4"
 
     // The version have to be compatible with Groovy:
     testCompile group: 'org.spockframework', name: 'spock-core', version: '2.0-M3-groovy-3.0'
@@ -48,7 +49,7 @@ dependencies {
 
 
 // for application plugin
-mainClassName = "io.jnorthr.toolkit.F5"       
+mainClassName = "io.jnorthr.toolkit.TemplateGUI"
 
 test {
     jvmArgs "-Dheadless=${project.hasProperty('headless') ? project.headless : true}"
@@ -77,12 +78,6 @@ task runChooser(type: JavaExec) {
     main = "io.jnorthr.toolkit.Chooser"
     classpath = sourceSets.main.runtimeClasspath
 }
-
-task runChooseCopybooksFolder(type: JavaExec) {
-    main = "io.jnorthr.toolkit.ChooseCopybooksFolder"
-    classpath = sourceSets.main.runtimeClasspath
-}
-
 
 // builds a tool to interact with the System Clipboard for most operatng systems
 task runCopier(type: JavaExec) {
@@ -156,9 +151,9 @@ task runResponse(type: JavaExec) {
 }
 
 // run test task
-// Feature to try new layout with accelerator & mnemonics buttons
-task runMenu(type: JavaExec) {
-    main = "io.jnorthr.toolkit.MenuAccessibility"
+// Feature to try new gui layout with button icons
+task runSample(type: JavaExec) {
+    main = "io.jnorthr.toolkit.Sample"
     classpath = sourceSets.main.runtimeClasspath
 }
 
@@ -166,13 +161,6 @@ task runMenu(type: JavaExec) {
 // Feature to get text for this function key and save it with known .txt filename 
 task runTemplateMaker(type: JavaExec) {
     main = "io.jnorthr.toolkit.TemplateMaker"
-    classpath = sourceSets.main.runtimeClasspath
-}
-
-// run TemplateMaker task
-// Feature to get text for this function key and save it with known .txt filename 
-task runTemplateGUI(type: JavaExec) {
-    main = "io.jnorthr.toolkit.TemplateGUI"
     classpath = sourceSets.main.runtimeClasspath
 }
 

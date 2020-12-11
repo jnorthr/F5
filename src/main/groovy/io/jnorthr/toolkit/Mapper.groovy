@@ -3,8 +3,7 @@ import groovy.transform.*;
 import javax.swing.*
 
 /*
- * Feature to find template replacement values within a function key payload template string like: '${xxx}'
- * user is prompted via dialog for a replacement text value for 'xxx' field. So if users keys 'fred' then '${xxx}' becomes 'fred' 
+ * Feature to find template replacement names within a template string
  */
 public class Mapper
 {
@@ -84,7 +83,7 @@ public class Mapper
         say "... x.size()="+x.size()
         
         x.each{xx->
-        	say "... xx=|->${xx};" 
+        	say "... xx=|${xx}|" 
 		}
 		say "\n------------------------\n"
 
@@ -154,7 +153,7 @@ public class Mapper
 
 
     /**
-     * A method to translate a Template  
+     * A method to translate a Groovy Template  
      *
      * @param  m is a Map of possibly zero entries
      * @return text string after template translation, or original constructor text if no ${} symbols exist
@@ -188,7 +187,7 @@ public class Mapper
         
         println "----------------\neach:";
         map.each{k,v->
-            println "... map[${k}]=|${v}|;"
+            println "... map[${k}]=|${v}|"
         } // end of each
 
         s = ma.getTemplate(map);
@@ -229,7 +228,6 @@ public class ${classname}
         println "----------------\ntemplate:\n------------------------------\n"+s+"\n--------------------------";
 
         println "--- the end---"
-		//System.exit();
     } // end of main 
 
 } // end of class

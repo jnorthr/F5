@@ -23,13 +23,13 @@ public class Chooser
     /**
      * A class reflecting values chosen by the user of JFileChooser.
      */
-    Response re = new Response();
+    Response re;
 
     // Offers access to app-specific and system metadata & values
-    ChooseCopybooksFolder pf = new ChooseCopybooksFolder();
+    PathFinder pf = new PathFinder();
 
     /** If we need to println audit log to work, this will be true */ 
-    private boolean audit = true;
+    private boolean audit = false;
 	
     /**
      * Handle to component used by the chooser dialog.
@@ -41,13 +41,8 @@ public class Chooser
    /** 
     * Private Class constructor.
     */
-    public Chooser()
+    private Chooser()
     {
-        say "... Chooser(String) initialPath=|${pf.getFolderName()}|"
-  	    re = new Response();
-      	re.fullname = pf.getFolderName();
-      	re.path = pf.getFolderName();
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     } // end of private constructor
     
 
@@ -58,13 +53,12 @@ public class Chooser
     public Chooser(String newTitle)
     {
         fc.setDialogTitle(newTitle);
-        say "... Chooser(String) initialPath=|${pf.getFolderName()}|"
+        say "... Chooser(String) initialPath=|${pf.home}|"
   	    re = new Response();
-      	re.fullname = pf.getFolderName();
-      	re.path = pf.getFolderName();
+      	re.fullname = pf.home;
+      	re.path = pf.home;
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		say "... Chooser constructor starts with re.fullname=|"+re.fullname+"|"; 
-		say "... pf.getFolderName()=|"+pf.getFolderName()+"|";       
+        //found = pf.fnFound;
     } // endof constructor
     
 
@@ -85,57 +79,52 @@ public class Chooser
         re.abort = false;
         re.eof = false;
 
-        re.returncode = fc.showOpenDialog() ;
+        re.returncode = fc.showOpenDialog(null) ;
 
-		say "response content:"+re.toString();
-		
         switch ( re.returncode )
         {
             case JFileChooser.APPROVE_OPTION:
 				File file = fc.getSelectedFile();
 		        re.found = file.exists();
 
-		        say "... JFileChooser.APPROVE_OPTION chose dir:"+fc.getCurrentDirectory().getAbsolutePath();
-				say "... fc.getSelectedFile()="+fc.getSelectedFile().toString();
+		        say "JFileChooser.APPROVE_OPTION chose dir:"+fc.getCurrentDirectory().getAbsolutePath();
+				say "fc.getSelectedFile()="+fc.getSelectedFile().toString();
                 // was this a directory folder ?
                 re.isDir = new File(file.toString()).isDirectory();
 
                 re.fullname = file.toString().trim();
                 re.path = fc.getCurrentDirectory().getAbsolutePath().trim();
-				say "... JFileChooser.APPROVE_OPTION re.fullname=|"+re.fullname+"|"
+
                 def ct = re.fullname.count("/"); 
                 ct = re.fullname.lastIndexOf("/")
                 re.artifact = re.fullname.substring(ct+1);
 
-                say "APPROVE path=|"+re.path+"| artifact=|"+re.artifact+"| fullname=|"+re.fullname+"| isDir="+re.isDir;
+                say "APPROVE path="+re.path+" artifact="+re.artifact+" fullname="+re.fullname+" isDir="+re.isDir;
 
-		        //pf.write(re.fullname.trim());                  
+		        pf.write(re.fullname.trim());                  
                 re.chosen = true;
                 say "response="+re.toString();
                 break;
 
             case JFileChooser.CANCEL_OPTION:
                   re.abort = true;
-                  say "... user cancelled action";
-				  say "... CANCEL path=|"+re.path+"| artifact=|"+re.artifact+"| fullname=|"+re.fullname+"| isDir="+re.isDir;
+                  say "user cancelled action";
                   break;
 
             case JFileChooser.ERROR_OPTION:
                   say "user action caused error";
-				  say "... ERROR path=|"+re.path+"| artifact=|"+re.artifact+"| fullname=|"+re.fullname+"| isDir="+re.isDir;
                   re.abort = true;
                   re.eof = true;
                   break;
 
             default:
                   say "user action caused unknown response:"+re.returncode;
-				  say "... DEFAULT path=|"+re.path+"| artifact=|"+re.artifact+"| fullname=|"+re.fullname+"| isDir="+re.isDir;
                   re.eof = true;
                   break;
 
         } // end of switch
         
-        say "... Chooser.getChoice() exited with response="+re.toString();
+        say "... Chooser.getChoice() exited with response="+re.returncode;
         return re;
     } // end of pick
 
@@ -162,19 +151,16 @@ public class Chooser
 	/*
 	 * To test the feature to allow user to choose a folder name 
 	 */    
+	    Response re;  
     
 	// ---------------------------------------------------------------------
 	/*
 	 * need to test selecting folders only
 	 */
         Chooser ch = new Chooser("Pick input Folder");
-
-		ch.re.toString();
         println "Pick a folder-only test"
         
-        Response re = ch.getChoice();
-		re.toString();
-
+        re = ch.getChoice();
         println ""; 
         if (re.abort)
         {

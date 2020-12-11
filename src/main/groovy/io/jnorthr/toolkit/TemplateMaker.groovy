@@ -47,7 +47,7 @@ public class TemplateMaker implements ActionListener{
     JTextField tooltip = new JTextField(30); 
 
     /** If we need to println audit log to work, this will be true */ 
-    boolean audit = false;
+    boolean audit = true;
 
     /** If we need to do a System.exit(0), this will be true else disposes of jframe and returns to caller */ 
     boolean exitOnClose = true;
@@ -382,18 +382,6 @@ public class TemplateMaker implements ActionListener{
      */
     private boolean setup()
     {
-        JRadioButton yesButton   = new JRadioButton("Yes", true);
-        JRadioButton noButton    = new JRadioButton("No");
-        JRadioButton maybeButton = new JRadioButton("Maybe");
-
-        //... Create a button group and add the buttons.
-        ButtonGroup bgroup = new ButtonGroup();
-        bgroup.add(yesButton);
-        bgroup.add(noButton);
-        bgroup.add(maybeButton);
-		//jp2.add(bgroup);
-        f.add(bgroup, BorderLayout.SOUTH);
-		
         jp2.add(new JLabel("Function key :"));
 		functionField.setText("");
         functionField.setEditable(true); 
@@ -405,7 +393,6 @@ public class TemplateMaker implements ActionListener{
         jp2.add(tooltip);
         tooltip.setEditable(true); 
 
-		
         // gui top for function key plus tooltip input
         f.add(jp2, BorderLayout.NORTH);
         jp.setLayout(new GridLayout(4,1)); // 4 rows one column
