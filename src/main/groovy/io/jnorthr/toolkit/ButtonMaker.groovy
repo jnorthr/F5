@@ -1,7 +1,6 @@
 package io.jnorthr.toolkit;
 
 import io.jnorthr.toolkit.F5Data;
-import io.jnorthr.toolkit.F5GUI;
 import io.jnorthr.toolkit.Copier;
 import io.jnorthr.toolkit.IO;
 import io.jnorthr.toolkit.Mapper;
@@ -24,6 +23,13 @@ import java.awt.GridLayout;
 import java.awt.event.*;
 import java.awt.*;
 
+import java.awt.datatransfer.ClipboardOwner
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.AbstractAction;
@@ -35,6 +41,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.event.*;
 import javax.swing.*;
+import javax.imageio.ImageIO;
 
 /**
  * This program demonstrates building a clickable Jbutton.
@@ -50,11 +57,6 @@ public class ButtonMaker
     */
     F5Data f5data;
 
-    /**
-    * a key/value map storage for known boilerplate variables used in F5 GUI
-    */
-    F5GUI f5gui;
-
     // a button to stop this app - usually tied to the ESC key on a keyboard
     JButton quitbutton; // = new JButton("Quit");
 
@@ -66,7 +68,7 @@ public class ButtonMaker
     KeyStroke escKeyStrokeHit = KeyStroke.getKeyStroke("ESCAPE");
 
     /** a hook to use of the Print Screen key */
-    KeyStroke printKeyStrokeHit = KeyStroke.getKeyStroke("PAUSE");
+    KeyStroke printKeyStrokeHit = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); 
 
     Color purple = new Color(255);
 
@@ -75,15 +77,18 @@ public class ButtonMaker
     
     Icon icon9 = new ImageIcon("images/PLUS.png");
 
+//	Action fromAction = new FromClipboardAction("From", icon9, "copy text from clipboard into function key's file", new Integer(printKeyStrokeHit));
+	
     Action editAction = new EditAction("Edit", icon9, "Fix text within a file", new Integer(KeyEvent.VK_COPY));
 
+	IO io = new IO();
+	
     /**
     * Default constructor to build a JButton instance
     */
     public ButtonMaker(F5Data f5d)
     {
 		f5data      = f5d;
-		f5gui = new F5GUI(f5data);
 		quitbutton  = makeQuitButton();
 		printbutton = makePrintButton();
     } // end of constructor
@@ -109,37 +114,52 @@ public class ButtonMaker
      * @return JButton containing logic to read text from external file
     */
     public JButton makeButton(String key)
-    {
+    {	
+		String g = "${key}";
+    	Icon icon = new ImageIcon("images/${key}.png");
+		if (icon==null) { mybutton.setText(g); }
+		Action myAction = new ToClipboardAction("${key}", icon, "${key} tooltip text goes here", new Integer(KeyEvent."VK_${key}"), f5data);
+
 		mybutton = new JButton(); 
+		mybutton.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+		mybutton.setBorderPainted(false);
+
 		mybutton.addMouseListener(new MouseAdapter()
 		{
 			public void mouseClicked(MouseEvent mEvt)
-			{   
-				String butSrcTxt = mEvt.toString();
+			{
 				Object source = mEvt.getSource();
+				String s = "";
+
 				if (source instanceof JButton) {
 					JButton btn = (JButton)source;
-					butSrcTxt = btn.getText();
-				} // end of if	
-    		} // end of mouseClicked
-		});
+					s = btn.getText();
+					io.read(s);
+					s = io.getPayload();
+				} // end of if
+				
+				//println "... Copier paste() received mouse event of "+s;
+				ClipboardOwner owner = null;
+				Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+				Transferable transferable = new StringSelection(s);
+				clipboard.setContents(transferable, owner);
+    		} // endof method
+		}); // end of addMou...
 
-		Action myAction = new ToClipboardAction("${key}", icon9, "${key} tooltip text goes here", new Integer(KeyEvent."VK_${key}"), f5gui);
-		String g = "${key}";
 	
 		/**
 		* when function key pressed, this is done
 		*/
-		mybutton.setText(g);
+		
 		mybutton.setActionCommand(g);
 		mybutton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent."VK_${key}", 0), key);
-
 		mybutton.getActionMap().put(key, myAction);
 
 		/**
 		* when function key pressed with SHIFT key down, this edit event is done to edit/revise payload
 		*/
 		mybutton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent."VK_${key}", KeyEvent.SHIFT_MASK), "Edit");
+		mybutton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent."VK_${key}", KeyEvent.CTRL_MASK), "Edit");
 		editAction.setKey(g);
 		mybutton.getActionMap().put("Edit", editAction);
 
@@ -150,21 +170,21 @@ public class ButtonMaker
 		mybutton.setFont(new Font("Arial", Font.PLAIN, 10));
 		mybutton.setBorderPainted(false);   // (new LineBorder(purple,2));   //Color.BLACK,1));
 		mybutton.setVerticalTextPosition(SwingConstants.BOTTOM);
-    	Icon icon = new ImageIcon("images/${key}.png");
     	mybutton.setIcon(icon); 
         mybutton.setContentAreaFilled(false);
         mybutton.setOpaque(true);
 
-
 		if (f5data.hasPayload[key])	// true if this function key text was found/loaded
 		{
 			mybutton.setForeground(Color.BLUE);
-			//mybutton.setBackground(Color.BLUE);
+			mybutton.setBackground(Color.WHITE);
 			mybutton.setFont(new Font("Arial", Font.BOLD, 10));
+			mybutton.setToolTipText(f5data.tooltips[key]);
 		} // end of if
 		else
 		{
 			mybutton.setBackground(Color.BLACK);
+			mybutton.setToolTipText("No text found for this key");
 		} // end of else
 
 		say "... ButtonMaker makeButton(${key}) method ended\n"
@@ -179,10 +199,10 @@ public class ButtonMaker
     */
     public JButton makePrintButton()
     {
-    	ImageIcon printer = new ImageIcon("images/PLUS.png");
+    	ImageIcon printer = new ImageIcon("images/screenprint.png");
 
 		// build an abstract shell of an action with known reaction when screen print key pressed on user keyboard
-        Action printAction = new PrintAction("", printer, null, new Integer(KeyEvent.VK_P))
+        Action printAction = new PrintAction("", printer, null, new Integer(KeyEvent.VK_ENTER), f5data)
 
 		//
 		// tied to PRINT button; when you hover over this choice, this tooltip is shown
@@ -191,28 +211,35 @@ public class ButtonMaker
 		{
 			public void mouseClicked(MouseEvent mEvt)
 			{
-				printAction();
+				def fn = System.getProperty("output.file");
+				String currentDirectory  = System.getProperty("user.dir") + File.separator;
+				if ( fn == null ) { fn = "${currentDirectory}screenprint.png" }
+				f5data.frame.setTitle("Screenprint sent to ${fn}.");
+
+				def size = Toolkit.getDefaultToolkit().getScreenSize();
+				java.awt.Rectangle pic = new Rectangle(size);
+    
+				ImageIO.write(new Robot().createScreenCapture(pic),"png", new File(fn));  
     		}
 		});
 
+		printbutton.setSize(new Dimension(60, 48))
+		printbutton.setMargin(new Insets(0, 0, 0, 0));
+		printbutton.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+		printbutton.setBorderPainted(false);
+
 		printbutton.setFont(new Font("Arial", Font.BOLD, 10));
-		printbutton.setBackground(Color.GREEN);
+		printbutton.setBackground(Color.WHITE);
         printbutton.setContentAreaFilled(false);
         printbutton.setOpaque(true);
-		printbutton.setBorder(new LineBorder(Color.BLACK,1));
+		//printbutton.setBorder(new LineBorder(Color.BLACK,1));
 
     	printbutton.setHorizontalTextPosition(SwingConstants.CENTER);
-		printbutton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(printKeyStrokeHit, "PRINT"); 
-		printbutton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(printKeyStrokeHit, "PRINTSCREEN");
+		printbutton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(printKeyStrokeHit, "Print"); 
 
-		// this marries the abstract quitAction to the ESC button 
-		printbutton.getActionMap().put("PRINT", printAction);
+		printbutton.getActionMap().put("Print", printAction);
 		printbutton.setAction(printAction); // when button mouse clicked
-		printbutton.setMnemonic(KeyEvent.VK_P);
-		// myItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK));
-		//printbutton.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
-		//printbutton.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK));
-		printbutton.setToolTipText("This key writes full screen copy to screenprint.png");
+		printbutton.setToolTipText("Your ENTER key writes full screen copy to screenprint.png");
 		return printbutton;
     } // end of makePrintButton
 
@@ -230,22 +257,31 @@ public class ButtonMaker
 		// tied to ESC button; when you hover over ESC choice, this tooltip text maybe shown
 		quitbutton.addMouseListener(new MouseAdapter()
 		{
+			public void mouseClicked(MouseEvent mEvt)
+			{
+				quitAction();
+    		}
 			public void mouseEntered(MouseEvent mEvt)
-            		{
+            {
 				quitbutton.setToolTipText( f5data.tooltips["ESC"] );
-				f5gui.setHeading(f5data.tooltips["ESC"]);
-    			}
+    		}
 		});
 
+		quitbutton.setSize(new Dimension(60, 48))
+		quitbutton.setMargin(new Insets(0, 0, 0, 0));
+		quitbutton.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+		quitbutton.setBorderPainted(false);
+		quitbutton.setFocusPainted(false);
+
 		quitbutton.setFont(new Font("Arial", Font.BOLD, 10));
-		quitbutton.setBackground(Color.GREEN);
+		quitbutton.setBackground(Color.WHITE);
         quitbutton.setContentAreaFilled(false);
        	quitbutton.setOpaque(true);
+
 		//quitbutton.setBorder(new LineBorder(purple,2));   //Color.BLACK,1));
     	quitbutton.setVerticalTextPosition(SwingConstants.CENTER);
     	quitbutton.setHorizontalTextPosition(SwingConstants.CENTER);
 		quitbutton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escKeyStrokeHit, "Quit");
-		quitbutton.setBorder(new LineBorder(Color.BLACK,1));
 
 		// this marries the abstract quitAction to the ESC button 
 		quitbutton.getActionMap().put("Quit", quitAction);
@@ -271,7 +307,6 @@ public class ButtonMaker
 		Map myPayload = ["F12":true]
 		Map tools = ["F12":"this is tooltip for F12"]
 
-		// F5GUI f5gui = new F5GUI();
 		println "ButtonMaker making F5Data"
 		F5Data f5data = new F5Data();
 		println "ButtonMaker ended making F5Data"

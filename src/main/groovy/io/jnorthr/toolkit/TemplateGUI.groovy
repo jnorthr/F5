@@ -14,23 +14,26 @@ import io.jnorthr.toolkit.actions.*;
 public class TemplateGUI implements ActionListener, KeyListener
 {
     /** a handle for our input/output framework */
-    IO io = new IO(true);
+    IO io = new IO();
 
     JFrame f = new JFrame();
     JButton b1 = new JButton("Clear");
-    JButton b2 = new JButton("Paste");
+    JButton b2 = new JButton("Copy");
     JButton b3 = new JButton("Save");
     JButton b4 = new JButton("Quit");
-    JLabel label = new JLabel("Text Payload to SAVE or Paste to Your Clipboard");
+    JButton b5 = new JButton("Add");
+    JLabel label = new JLabel("Text Payload to SAVE or COPY to Your Clipboard");
 
-	/* these two panels added to ContentPane of JFrame */
+    /* these two panels added to ContentPane of JFrame */
     JPanel jp = new JPanel();
     JPanel jp2 = new JPanel();
 
     JTextField functionField = new JTextField(3); 
     JTextField tooltip = new JTextField(30); 
     JTextArea area = new JTextArea(10,40);  
-
+    String key = "";
+    String tool = "";
+    String payload = "";
 	/*
 	* KeyStroke modifier choices :
 	* SHIFT_MASK
@@ -40,20 +43,93 @@ public class TemplateGUI implements ActionListener, KeyListener
 	* ALT_GRAPH_MASK
 	*/
     KeyStroke stroke = KeyStroke.getKeyStroke("ESCAPE");
-    KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0);
+    //KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0);
     
+
+    boolean hold = false; // true to disable entry of new functionfield value 
     boolean more = true;
     boolean audit = true;
     boolean ans   = false;
     
     // get checkmark .png image then place on pressed button
-    Icon check = new ImageIcon("images/check.png");
+    Icon check = new ImageIcon("images/CHECK.png");
     Icon icon7;
         
     /**
      * Default constructor builds a tool to get payload text for this function key and save in a file
      */
     public TemplateGUI()
+    {
+		setup();
+    } // end constructor
+
+    public TemplateGUI(String newkey)
+    {
+		functionField.setEnabled(false);
+		key = newkey;
+		hold = true;
+		io.reset(key);
+		payload = io.getPayload(key);
+		tool = io.getToolTip(key);
+		setup();
+    } // end constructor
+
+    public TemplateGUI(String newkey, String newtool)
+    {
+		functionField.setEnabled(false);
+		key = newkey;
+		tool = newtool;
+		hold = true;
+		setup();
+    } // end constructor
+
+
+    public TemplateGUI(String newkey, String newtool, String newarea)
+    {
+		functionField.setEnabled(false);
+		key = newkey;
+		tool = newtool;	
+		hold = true;
+		payload = newarea;
+		setup();
+    } // end constructor
+
+	public void focus()
+	{
+	    if (!hold)
+	    {
+            functionField.setEditable(true); 
+	    	functionField.grabFocus();
+	    	functionField.requestFocus();
+	    }
+	    else
+	    {
+            functionField.setEditable(false); 
+            tooltip.grabFocus(); 
+            tooltip.requestFocus(); 
+	    } // end of else
+	} // end of focus
+
+
+	// logic to confirm function key value is within range of F1 thru F24;
+	public boolean validate(def key)
+	{
+		if (key==null) {key = "";}
+		key = key.trim().toUpperCase();
+		def keys1 = 'F1'..'F9'
+		def keys2 = 'F10'..'F19'
+		def keys3 = 'F20'..'F24'
+		def yn = (key in keys1 || key in keys2 || key in keys3);
+		if (!yn)
+		{
+            def ss = "Function key <${key}> not in range F1-F24"
+            int answer = JOptionPane.showMessageDialog(null, ss, "Bad News", JOptionPane.ERROR_MESSAGE);
+		} // end of if
+		return yn;
+	} // end of validate
+
+
+    public void setup()  // TemplateGUI()
     {
         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
        
@@ -67,34 +143,25 @@ public class TemplateGUI implements ActionListener, KeyListener
         * @param  java.awt.event.WindowAdapter that caused this action - probably click red X on JFrame
         * @return void
         */
-        f.addWindowListener(new java.awt.event.WindowAdapter() {
-        @Override
-        public void windowClosing(java.awt.event.WindowEvent windowEvent) 
-        {
-            if (JOptionPane.showConfirmDialog(f, 
-                "Are you sure you want to close this window?", "Close Window?", 
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
-                {    
-                    //if (!more) {return;}
-                    //more = false;
-                    f.dispatchEvent(new WindowEvent(f, WindowEvent.WINDOW_CLOSING));
-                    return;  //System.exit(0);
-                }
-            } // end of if
-        }); // end of method & end of addWindowListener
+        f.addWindowListener(new java.awt.event.WindowAdapter() 
+		{
+	        @Override
+	        public void windowClosing(java.awt.event.WindowEvent windowEvent) 
+	        {
+				return; 
+	    	} // end of windowClosing
+		}); // end of addWindowListener
 
         // if the Red X close button has not been clicked above, 'more' will be true
-        if (more)
-        {
-            ans = ask("Do you want to construct a template file now ?"); 
-            more = ans;
-        } // end of if
-                
-		if (!more)
+        //if (more)
+        //{
+        //ans = ask("Do you want to construct a template file now ?"); 
+        //more = ans;
+        //} // end of if
+        
+		ans = true;        
+		if (!ans)
 		{
-            f.setTitle("F5 -> Default Values Used");
-            JOptionPane.showMessageDialog(f, "If template found for this key, it will be copied to clipboard.");
             f.dispose();
 			return;
         } // end of else
@@ -102,14 +169,13 @@ public class TemplateGUI implements ActionListener, KeyListener
         {
             // JPanel jp2 holds fields for top of dialog
             jp2.add(new JLabel("Function key :"));
-			functionField.setText("");
+			functionField.setText(key);
             functionField.setEditable(true);
             functionField.setToolTipText( "Enter your function key choice between F1 & F24" ); 
             jp2.add(functionField);
-			functionField.requestFocus();
 
             jp2.add(new JLabel("Tooltip Title :"));
-            tooltip.setText("");
+            tooltip.setText(tool);
             tooltip.setToolTipText( "This will become the tooltip for your function key" ); 
             jp2.add(tooltip);
             tooltip.setEditable(true); 
@@ -118,19 +184,21 @@ public class TemplateGUI implements ActionListener, KeyListener
             area.setLineWrap(true);
             Font font = new Font("Courier", Font.BOLD, 12);
             area.setFont(font);
-            area.setText("");
+            area.setText(payload);
             area.setToolTipText( "Enter or paste text here to put on clipboard when function key pressed." );
             area.setEditable(true); 
       	    area.setBackground(Color.YELLOW);
 
             b1.addActionListener(this);
+            b5.addActionListener(this);
             b2.addActionListener(this);
             b3.addActionListener(this);
             b4.addActionListener(this);
 
             // JPanel jp holds fields for buttons of this dialog
-            jp.setLayout(new GridLayout(4,1)); // 4 rows one column
+            jp.setLayout(new GridLayout(5,1)); // 5 rows one column
             jp.add(b1);
+            jp.add(b5);
             jp.add(b2);
             jp.add(b3);
             jp.add(b4);
@@ -139,9 +207,13 @@ public class TemplateGUI implements ActionListener, KeyListener
             b1.setIcon(icon7);
             b1.setToolTipText( "This will clear all fields in this dialog." );
                         
-            icon7 = new ImageIcon("images/CROSS.png");
+            icon7 = new ImageIcon("images/PLUS.png");
+            b5.setIcon(icon7);
+            b5.setToolTipText( "Click here to open, clear & fill all fields then click SAVE." );
+                        
+            icon7 = new ImageIcon("images/WORK.png");
             b2.setIcon(icon7);
-            b2.setToolTipText( "Your payload text is copied to your system clipboard." );
+            b2.setToolTipText( "Your payload text will be copied to the system clipboard." );
 
             icon7 = new ImageIcon("images/SAVE.png");
             b3.setIcon(icon7);
@@ -164,9 +236,10 @@ public class TemplateGUI implements ActionListener, KeyListener
             f.add(jp,BorderLayout.EAST);  
             f.add(new JScrollPane(area), BorderLayout.CENTER);
             f.add(label, BorderLayout.SOUTH);
-            f.setSize(600,400);
+            f.setSize(640,480);
             f.pack();
             f.setLocationRelativeTo(null);
+			focus();
 			f.setVisible(true);      		
         } // end of else      
     } // end of constructor
@@ -235,59 +308,61 @@ public class TemplateGUI implements ActionListener, KeyListener
     public void actionPerformed(ActionEvent e)
     {
         say "... some action happened at "+e.getSource();
-            icon7 = new ImageIcon("images/CLS.png");
-            b1.setIcon(icon7);
-            icon7 = new ImageIcon("images/CROSS.png");
-            b2.setIcon(icon7);
-            icon7 = new ImageIcon("images/SAVE.png");
-            b3.setIcon(icon7);
+        icon7 = new ImageIcon("images/CLS.png");
+        b1.setIcon(icon7);
+        icon7 = new ImageIcon("images/WORK.png");
+        b2.setIcon(icon7);
+        icon7 = new ImageIcon("images/SAVE.png");
+        b3.setIcon(icon7);
+        icon7 = new ImageIcon("images/PLUS.png");
+        b5.setIcon(icon7);
 
-        // CLEAR  button logic comes here
+        // CLEAR button logic comes here
         if (e.getSource()==b1)
         { 
             //say "... CLEAR actionPerformed";
-            area.setText("");
-            tooltip.setText("");
-            functionField.setText("");
+			payload = "";
+			if (!hold) { key = ""; }
+			tool="";
+            area.setText(payload);
+            tooltip.setText(tool);
+            functionField.setText(key);
            
             b1.setIcon(check);
-            functionField.requestFocus();
+            focus();
         } // end of if
 
-        // PASTE choice here ...
+        // COPY choice here ...
         if (e.getSource()==b2)
         { 
-            //say "... PASTE actionPerformed";
+			key = functionField.getText();
+            tool = tooltip.getText();
+            payload = area.getText();
+
             Copier co = new Copier();
-            String s2 = area.getText();
-            co.paste(s2);
-            //say "... button 2 copy payload text to clipboard:"+s2;
-    	     b2.setIcon(check);
+            co.paste(payload);
+
+            b2.setIcon(check);
+			String tx2 = "Copied ${payload.size()} bytes to System Clipboard.";
+            b2.setToolTipText(tx2);
+			focus();
         } // end of if
 
         // SAVE button: use IO code to write new template payload and tooltip to chosen output folder
         if (e.getSource()==b3)
         { 
-            // build payload text file name here, i.e. F11.txt
-            //say "... SAVE action found functionField=|${functionField.getText()}|"
-            String fi = functionField.getText().trim();
-			//say "... TemplateGUI.getSource = b3 where fi="+fi;
-            // get payload text for this Function Key choice
-            String payload = area.getText(); 
-            String tx = "";
+			key = functionField.getText().trim().toUpperCase();
+            tool = tooltip.getText().trim();
+            payload = area.getText().trim();
+			String tx = "|"+tool+"|"+payload;
 
             // remember tooltip title in our payload file delimited by || char.s
-            String tt = tooltip.getText().trim();
-            if ( tt.size() > 0 ) 
-            { 
-                payload = "|"+tt.trim()+"|"+area.getText();  
-            } // end of if
-
-			io.reset(fi);
-            tx = io.write(payload); 
-            say "... wrote ${fi} file with ${payload.size()} bytes;";
-
+			io.reset(key);
+            io.write(tx);
+ 
+            b3.setToolTipText("Wrote ${key} file with ${tx.size()} bytes.");
             b3.setIcon(check);
+			focus();
         } // end of if
 
         // exit button when clicked or ESC key hit
@@ -296,7 +371,24 @@ public class TemplateGUI implements ActionListener, KeyListener
             say "... EXIT actionPerformed";
             f.dispatchEvent(new WindowEvent(f, WindowEvent.WINDOW_CLOSING));
             return;
-        } // end of if        
+        } // end of if  
+
+        // ADD button logic comes here
+        if (e.getSource()==b5 )
+        { 
+			payload = "";
+			key = "";
+			tool="";
+            area.setText(payload);
+            tooltip.setText(tool);
+            functionField.setText(key);
+            hold = false;
+            b5.setIcon(check);
+            functionField.setEditable(true); 
+	    	functionField.grabFocus();
+	    	functionField.requestFocus();
+        } // end of if
+      
     } // end of method
 
 
@@ -368,10 +460,9 @@ public class TemplateGUI implements ActionListener, KeyListener
         println "----------------------------------- ";
         println "... TemplateGUI F12 updating Test 1 ...";
 	    try{
-			TemplateGUI f12 = new TemplateGUI();
+			TemplateGUI f12 = new TemplateGUI("F11");  //"f12","This is a tip in here.","What a payload in here !");
                 
-			//def xxx = f12.ask("F12 updating Test 1"); println "... ask():"+xxx;
-            println "----------------------------------- ";
+	        println "----------------------------------- ";
             //xxx = f12.getChoice();
             //if (xxx==null) {xxx = "-no choice made -"; }
             //println "... f12.getChoice()="+xxx;
@@ -380,9 +471,18 @@ public class TemplateGUI implements ActionListener, KeyListener
         {
 			println "--- F12 failed :"+x.toString();  // should pass as F12 is not in allowable list of keys 
         } // end of catch
-        println "--- the end of TemplateGUI ---\n\n";
+        
+		println "--- the end of TemplateGUI ---\n\n";
             
 /*
+def va = "F2"
+println "\n${va} ="+validate(va);
+def va = " f24"
+println "${va} ="+validate(va);
+va ='ccc';
+println "${va} ="+validate(va);
+
+
             println "----------------------------------- ";
             println "... TemplateGUI F12 updating Test 2 ...";
             try{

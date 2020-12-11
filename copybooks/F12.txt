@@ -1,1 +1,1 @@
-|Tooltip  for F12|Payload for F12
+|F12 tooltip text goes here|This is F12 text payload. Hi ${name}

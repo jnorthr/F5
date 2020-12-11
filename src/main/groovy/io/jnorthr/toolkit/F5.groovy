@@ -28,7 +28,7 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.*;
-
+import javax.swing.JFrame;
 
 /**
  * This Swing program demonstrates function key usage from a keyboard and/or clickable Jbutton.
@@ -40,28 +40,13 @@ import javax.swing.*;
  */
 public class F5
 {
+	JFrame frame = new JFrame("F5 Utility - to copy function key text to System Clipboard");
+
 	/** a handle to our global variables to do read/write stuff */
-	F5Data f5data = new F5Data();
+	F5Data f5data;
 
 	/** a handle to our GUI module to track global GUI stuff - this is your JFrame ! */
-	F5GUI f5gui = new F5GUI(f5data);
-
-	/** If we need to println audit log to work, this will be true */
-    boolean audit = true;
-
-	/** a handle to generic JButton builder for one Function Key  */
-//	ButtonMaker buttonMaker;
-
-    /**
-     * A method to print an audit log if audit flag is true
-     *
-     * @param  text to show user via println
-     * @return void
-     */
-    public void say(String text)
-    {
-        if (audit) { println text; }
-    } // end of method
+	F5GUI f5gui;
 
 
 	/**
@@ -69,51 +54,9 @@ public class F5
 	*/
 	public F5()
 	{
-//		buttonMaker = new ButtonMaker(f5data)
-		say "\n\n... F5() constructor before makeQuitButton()";
-//		buttonMaker.quitbutton = buttonMaker.makeQuitButton();
-		f5data.tooltips = f5gui.getAvailableTooltips();
-		
-		JButton b;
-
-		(1..12).eachWithIndex{ num, ix ->
-			String tx = "F${num}";
-			say "\n\n... F5() constructor before makeButton(${tx})";
-			b = new JButton(tx);
-			//b = buttonMaker.makeButton(tx);
-			say "... F5() constructor after makeButton(${tx})\n\n"
-
-			if (f5data.hasPayload[tx])
-			{
-				b.setToolTipText( f5data.tooltips[tx] );
-			}
-			else
-			{
-				b.setToolTipText("${tx} has no Payload");	
-			}
-
-			say "... F5 constructor adding button ${num}+${ix}="+f5data.tooltips[tx];
-			f5gui.add(b);
-			f5data.buttons[tx] = b;
-			f5gui.cleanup(tx);
-			say " ";
-		} // end of each
-
-/*
-		// the Screen Print button
-		b = buttonMaker.printbutton;
-		f5gui.add(b);
-
-		// build the Arrow button to move gui to bottom or left or right edge of hardware screen
-		b = buttonMaker.arrowbutton;    //makeButtonA();
-		f5gui.add(b);
-
-		// the ESC button
-		b = buttonMaker.quitbutton;
-		f5gui.add(b);
-*/
-
-		f5gui.setVisible(true);
+		f5data = new F5Data();
+		f5data.setFrame(frame);
+		f5gui = new F5GUI(f5data);
 	} // end of constructor
 
 
@@ -126,8 +69,8 @@ public class F5
       * @param  args a list of possibly zero entries from the command line; first arg[0] if present, is
       *         taken as a simple file name of a groovy script-structured configuration file;
     */
-	public static void main(String[] args) {
-
+	public static void main(String[] args) 
+	{
 		SwingUtilities.invokeAndWait(new Runnable()
 		{
 			@Override

@@ -24,6 +24,7 @@ public class ExitAction extends AbstractAction
 
   public void actionPerformed(ActionEvent e)
   {
+    //println "... ExitAction.actionPerformed";
     System.exit(0);
   }
 }

@@ -15,10 +15,10 @@ import javax.swing.*;
  *
  */
 public class PositionLogic extends ComponentAdapter{
-    int windowX = 420; // width
-    int windowY = 260; // height
+    int windowX = 910; // width
+    int windowY = 115; // height
     int windowXv = windowX;
-    int windowYv = windowY * 1.1;
+    int windowYv = windowY;
 
     String txt = "Hello World";
     int loc = 0;
@@ -52,13 +52,10 @@ public class PositionLogic extends ComponentAdapter{
     public PositionLogic(JFrame frame){  // throws HeadlessException {
         f = frame;
         f.addComponentListener(this);
-
-        f.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "DELETE");
-        f.getRootPane().getActionMap().put("DELETE", moveAction);
         f.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "ESCAPE_KEY");
         f.getRootPane().getActionMap().put("ESCAPE_KEY", escapeAction);
-        f.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SLASH, 0, false), "MOVER");
-        f.getRootPane().getActionMap().put("MOVER", moveAction);        
+        f.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SLASH, 0, false), "MOVE");
+        f.getRootPane().getActionMap().put("MOVE", moveAction);        
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     } // end of constructor
     
@@ -68,7 +65,7 @@ public class PositionLogic extends ComponentAdapter{
         @Override
         public void actionPerformed(ActionEvent ae) 
         {
-            println "... escapeAction done -";
+            //println "... escapeAction done -";
             f.dispose();
         }; // end
     }; // end of escapeAction
@@ -76,6 +73,7 @@ public class PositionLogic extends ComponentAdapter{
     // this has all logic to position jframe to bottom, left,right, etc
     final AbstractAction moveAction = new AbstractAction() { 
         private static final long serialVersionUID = 1L;
+		//println "... PositionLogic.moveAction abstractaction hit";
         @Override
         public void actionPerformed(ActionEvent ae) {
         switch(loc)
@@ -110,8 +108,8 @@ public class PositionLogic extends ComponentAdapter{
             case 2: 
                 f.setPreferredSize(hWindow);
                 windowSize = f.getSize();
-                windowY = screenSize.height - (windowSize.height + 20);
-                f.setLocation(windowX,windowY);
+                windowY = screenSize.height - (windowSize.height + 40);
+                f.setLocation(0,windowY);
                 f.pack();
                 txt = "@"+loc+ " windowX="+windowX+" windowY="+windowY+"\n"; 
                 label.setText(txt);
@@ -123,7 +121,7 @@ public class PositionLogic extends ComponentAdapter{
                 f.setPreferredSize(hWindow);
                 windowSize = f.getSize();
                 windowX = (screenSize.width / 2) - (windowSize.width / 2);
-                windowY = screenSize.height - (windowSize.height + 30);
+                windowY = screenSize.height - (windowSize.height + 40);
                 f.setLocation(windowX,windowY);
                 f.pack();
                 txt = "@"+loc+ " windowX="+windowX+" windowY="+windowY+"\n"; 
@@ -135,8 +133,10 @@ public class PositionLogic extends ComponentAdapter{
             case 4: 
                 f.setPreferredSize(hWindow);
                 windowSize = f.getSize();
+
                 windowX = screenSize.width - windowSize.width;
-                windowY = screenSize.height - (windowSize.height + 30);
+                windowY = screenSize.height - (windowSize.height + 40);
+
                 f.setLocation(windowX,windowY);
                 f.pack();
                 txt = "@"+loc+ " X="+windowX+" Y="+windowY+"\n"; 
@@ -148,8 +148,10 @@ public class PositionLogic extends ComponentAdapter{
             case 5: 
                 f.setPreferredSize(vWindow);
                 windowSize = f.getSize();
-                windowX = screenSize.width - windowSize.width;
+
                 windowY = (screenSize.height / 2) - (windowSize.height / 2);
+                windowX = screenSize.width - windowSize.width;
+
                 f.setLocation(windowX,windowY);
                 f.pack();
                 txt = "@"+loc+" windowX="+windowX+" windowY="+windowY+"\n"; 
@@ -162,8 +164,8 @@ public class PositionLogic extends ComponentAdapter{
                 f.setPreferredSize(vWindow);
                 windowSize = f.getSize();
                 windowX = screenSize.width - windowSize.width;
-                windowY = +5;
-                f.setLocation(windowX,windowY);
+                windowY = 0;
+                f.setLocation(windowX,0);
                 f.pack();
                 txt = "@"+loc+ " windowX="+windowX+" windowY="+windowY+"\n"; 
                 label.setText(txt);
@@ -204,7 +206,7 @@ public class PositionLogic extends ComponentAdapter{
         windowX = wide;
         windowY = high;
         windowXv = windowX;
-        windowYv = windowY * 1.1;
+        windowYv = windowY;
         windowSize = new Dimension(windowX,windowY);
         hWindow = new Dimension(windowX,windowY);
         vWindow = new Dimension(windowXv,windowYv);
@@ -227,7 +229,7 @@ public class PositionLogic extends ComponentAdapter{
     
         f.setPreferredSize(hWindow);
         f.setSize(hWindow);    
-        f.setLocation(windowX,windowY);
+        f.setLocationRelativeTo(null);  //.setLocation(windowX,windowY);
         f.pack();
 	} // end of setup
 
@@ -245,7 +247,7 @@ public class PositionLogic extends ComponentAdapter{
             println "--- Starting PositionLogic"
             JFrame fr = new JFrame("F5 -");
             PositionLogic pl = new PositionLogic(fr);  
-            pl.setSize(420,260);
+            pl.setSize(890, 94);
             pl.setup();
             fr.setVisible(true);
             println "--- the end of PositionLogic ---"

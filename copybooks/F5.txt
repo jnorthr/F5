@@ -1,2 +1,2 @@
-|F5 tooltip goes here|This is a ayload for the F5 function
+|F5 tooltip goes here|This is a payload for the F5 function
 key here.

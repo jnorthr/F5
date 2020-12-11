@@ -49,7 +49,7 @@ test {
 
 /*
 task wrapper(type: Wrapper) {
-    gradleVersion '5.2.1'
+    gradleVersion '6.7'
 }
 */
 
@@ -83,6 +83,3 @@ task(runCoreDisplay, dependsOn: 'classes', type: JavaExec) {
 		main = 'com.jim.toolkit.gui.CoreDisplay'
 		classpath = sourceSets.main.runtimeClasspath
 } // end of task
-
-
-
